@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+# builddisk - creates a bootable floppy disk by placing
+#             boot, second and os onto the floppydisk.
+#             The floppydisk must be low level formatted.
+#
+
+
+if [ "$RELEASEROOT" = "" ] ; then
+    RELEASEROOT=/usr/local/share/m2ukernel
+fi
+
+STEM=$RELEASEROOT/rtp
+LOAD=$STEM/bin/load
+BOOT=$STEM/bin/boot
+SECOND=$STEM/bin/second
+DEBUG=
+DRIVE=/dev/fd0
+STACKSIZE=1M
+EXEFILE=$1
+
+shift 1
+while [ $# -gt 0 ] ; do
+   if [ "$1" = "-g" ]
+   then
+      DEBUG=-g
+   elif [ "$1" = "-drive" ]
+   then
+      DRIVE=$2
+      shift 1
+   elif [ "$1" = "-stack" ]
+   then
+      STACKSIZE=$1
+   else
+      EXEFILE=$1
+   fi
+   shift 1
+done
+
+if [ "$EXEFILE" = "" ]
+then
+   echo "Usage: builddisk exefile [ -drive drive ] [-g] [-stack stacksize(M|K) ]"
+   exit 1
+else
+   echo "place a low level formatted floppy disk into drive a:"
+   echo  $LOAD $DEBUG -o image -Mi+d -0 $BOOT -1 -Mi=d $SECOND -Mi+d -stack $STACKSIZE $EXEFILE
+   $LOAD $DEBUG -o image -Mi+d -0 $BOOT -1 -Mi=d $SECOND -Mi+d -stack $STACKSIZE $EXEFILE
+   dd if=image of=$DRIVE bs=18k
+fi

@@ -1,0 +1,157 @@
+extern  void _M2_crt0_init (int argc, char *argv[]);
+extern  void _M2_crt0_finish (void);
+extern  void _M2_initsubsystem_init (int argc, char *argv[]);
+extern  void _M2_initsubsystem_finish (void);
+extern  void _M2_M2RTS_init (int argc, char *argv[]);
+extern  void _M2_M2RTS_finish (void);
+extern  void _M2_Storage_init (int argc, char *argv[]);
+extern  void _M2_Storage_finish (void);
+extern  void _M2_Exceptions_init (int argc, char *argv[]);
+extern  void _M2_Exceptions_finish (void);
+extern  void _M2_osinit_init (int argc, char *argv[]);
+extern  void _M2_osinit_finish (void);
+extern  void _M2_ASCII_init (int argc, char *argv[]);
+extern  void _M2_ASCII_finish (void);
+extern  void _M2_StrLib_init (int argc, char *argv[]);
+extern  void _M2_StrLib_finish (void);
+extern  void _M2_PortIO_init (int argc, char *argv[]);
+extern  void _M2_PortIO_finish (void);
+extern  void _M2_NumberIO_init (int argc, char *argv[]);
+extern  void _M2_NumberIO_finish (void);
+extern  void _M2_IRQ_init (int argc, char *argv[]);
+extern  void _M2_IRQ_finish (void);
+extern  void _M2_StrIO_init (int argc, char *argv[]);
+extern  void _M2_StrIO_finish (void);
+extern  void _M2_StdIO_init (int argc, char *argv[]);
+extern  void _M2_StdIO_finish (void);
+extern  void _M2_Scn_init (int argc, char *argv[]);
+extern  void _M2_Scn_finish (void);
+extern  void _M2_SYSTEM_init (int argc, char *argv[]);
+extern  void _M2_SYSTEM_finish (void);
+extern  void _M2_Descriptors_init (int argc, char *argv[]);
+extern  void _M2_Descriptors_finish (void);
+extern  void _M2_WordSizes_init (int argc, char *argv[]);
+extern  void _M2_WordSizes_finish (void);
+extern  void _M2_OSParameters_init (int argc, char *argv[]);
+extern  void _M2_OSParameters_finish (void);
+extern  void _M2_Dump_init (int argc, char *argv[]);
+extern  void _M2_Dump_finish (void);
+extern  void _M2_MonStrIO_init (int argc, char *argv[]);
+extern  void _M2_MonStrIO_finish (void);
+extern  void _M2_InterruptVector_init (int argc, char *argv[]);
+extern  void _M2_InterruptVector_finish (void);
+extern  void _M2_MemRegion_init (int argc, char *argv[]);
+extern  void _M2_MemRegion_finish (void);
+extern  void _M2_libg_init (int argc, char *argv[]);
+extern  void _M2_libg_finish (void);
+extern  void _M2_gdb_init (int argc, char *argv[]);
+extern  void _M2_gdb_finish (void);
+extern  void _M2_Executive_init (int argc, char *argv[]);
+extern  void _M2_Executive_finish (void);
+extern  void _M2_NonAscii_init (int argc, char *argv[]);
+extern  void _M2_NonAscii_finish (void);
+extern  void _M2_KeyBoardLEDs_init (int argc, char *argv[]);
+extern  void _M2_KeyBoardLEDs_finish (void);
+extern  void _M2_Colours_init (int argc, char *argv[]);
+extern  void _M2_Colours_finish (void);
+extern  void _M2_KeyBoardConvert_init (int argc, char *argv[]);
+extern  void _M2_KeyBoardConvert_finish (void);
+extern  void _M2_ColourText_init (int argc, char *argv[]);
+extern  void _M2_ColourText_finish (void);
+extern  void _M2_BufferDevice_init (int argc, char *argv[]);
+extern  void _M2_BufferDevice_finish (void);
+extern  void _M2_WindowDevice_init (int argc, char *argv[]);
+extern  void _M2_WindowDevice_finish (void);
+extern  void _M2_TTIO_init (int argc, char *argv[]);
+extern  void _M2_TTIO_finish (void);
+extern  void _M2_processes_init (int argc, char *argv[]);
+extern  void _M2_processes_finish (void);
+
+extern  void M2RTS_ExecuteTerminationProcedures(void);
+
+extern  void M2RTS_ExecuteInitialProcedures(void);
+
+static void init (int argc, char *argv[])
+{
+    _M2_crt0_init (argc, argv);
+    _M2_initsubsystem_init (argc, argv);
+    _M2_M2RTS_init (argc, argv);
+    _M2_Storage_init (argc, argv);
+    _M2_Exceptions_init (argc, argv);
+    _M2_osinit_init (argc, argv);
+    _M2_ASCII_init (argc, argv);
+    _M2_StrLib_init (argc, argv);
+    _M2_PortIO_init (argc, argv);
+    _M2_NumberIO_init (argc, argv);
+    _M2_IRQ_init (argc, argv);
+    _M2_StrIO_init (argc, argv);
+    _M2_StdIO_init (argc, argv);
+    _M2_Scn_init (argc, argv);
+    _M2_SYSTEM_init (argc, argv);
+    _M2_Descriptors_init (argc, argv);
+    _M2_WordSizes_init (argc, argv);
+    _M2_OSParameters_init (argc, argv);
+    _M2_Dump_init (argc, argv);
+    _M2_MonStrIO_init (argc, argv);
+    _M2_InterruptVector_init (argc, argv);
+    _M2_MemRegion_init (argc, argv);
+    _M2_libg_init (argc, argv);
+    _M2_gdb_init (argc, argv);
+    _M2_Executive_init (argc, argv);
+    _M2_NonAscii_init (argc, argv);
+    _M2_KeyBoardLEDs_init (argc, argv);
+    _M2_Colours_init (argc, argv);
+    _M2_KeyBoardConvert_init (argc, argv);
+    _M2_ColourText_init (argc, argv);
+    _M2_BufferDevice_init (argc, argv);
+    _M2_WindowDevice_init (argc, argv);
+    _M2_TTIO_init (argc, argv);
+   M2RTS_ExecuteInitialProcedures ();
+    _M2_processes_init (argc, argv);
+}
+
+static void finish (void)
+{
+   M2RTS_ExecuteTerminationProcedures ();
+   _M2_processes_finish ();
+   _M2_TTIO_finish ();
+   _M2_WindowDevice_finish ();
+   _M2_BufferDevice_finish ();
+   _M2_ColourText_finish ();
+   _M2_KeyBoardConvert_finish ();
+   _M2_Colours_finish ();
+   _M2_KeyBoardLEDs_finish ();
+   _M2_NonAscii_finish ();
+   _M2_Executive_finish ();
+   _M2_gdb_finish ();
+   _M2_libg_finish ();
+   _M2_MemRegion_finish ();
+   _M2_InterruptVector_finish ();
+   _M2_MonStrIO_finish ();
+   _M2_Dump_finish ();
+   _M2_OSParameters_finish ();
+   _M2_WordSizes_finish ();
+   _M2_Descriptors_finish ();
+   _M2_SYSTEM_finish ();
+   _M2_Scn_finish ();
+   _M2_StdIO_finish ();
+   _M2_StrIO_finish ();
+   _M2_IRQ_finish ();
+   _M2_NumberIO_finish ();
+   _M2_PortIO_finish ();
+   _M2_StrLib_finish ();
+   _M2_ASCII_finish ();
+   _M2_osinit_finish ();
+   _M2_Exceptions_finish ();
+   _M2_Storage_finish ();
+   _M2_M2RTS_finish ();
+   _M2_initsubsystem_finish ();
+   _M2_crt0_finish ();
+}
+
+int start_kernel (int argc, char *argv[])
+{
+   init (argc, argv);
+   finish ();
+   return (0);
+}

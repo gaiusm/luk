@@ -1,0 +1,89 @@
+DEFINITION MODULE WordSizes ;
+
+(*
+    Title      : WordSizes
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Wed Jun 15 12:01:35 1994
+    Last edit  : Wed Jun 15 12:01:35 1994
+    Description: provides procedures for manipulating word sizes.
+*)
+
+FROM SYSTEM IMPORT BYTE ;
+
+EXPORT QUALIFIED SHORTWORD, LONGWORD,
+                 ShortWordToCardinal, LongWordToCardinal,
+                 CardinalToShortWord, CardinalToLongWord,
+                 FlipShortWord, FlipLongWord,
+                 WriteLong, WriteShort ;
+
+
+TYPE
+   SHORTWORD = RECORD
+                  ByteLo, ByteHi: BYTE ;
+      	       END ;
+
+   LONGWORD = RECORD
+                 WordLo: SHORTWORD ;
+                 WordHi: SHORTWORD ;
+      	      END ;
+
+
+(*
+   ShortWordToCardinal - converts a short word into a cardinal.
+*)
+
+PROCEDURE ShortWordToCardinal (s: SHORTWORD) : CARDINAL ;
+
+
+(*
+   LongWordToCardinal - converts a short word into a cardinal.
+*)
+
+PROCEDURE LongWordToCardinal (l: LONGWORD) : CARDINAL ;
+
+
+(*
+   CardinalToShortWord - converts a cardinal into a short word.
+*)
+
+PROCEDURE CardinalToShortWord (c: CARDINAL) : SHORTWORD ;
+
+
+(*
+   CardinalToLongWord - converts a cardinal into a long word.
+*)
+
+PROCEDURE CardinalToLongWord (c: CARDINAL) : LONGWORD ;
+
+
+(*
+   FlipShortWord - returns the byte flipped SHORTWORD, s.
+*)
+
+PROCEDURE FlipShortWord (s: SHORTWORD) : SHORTWORD ;
+
+
+(*
+   FlipLongWord - returns the byte flipped LONGWORD, l.
+*)
+
+PROCEDURE FlipLongWord (l: LONGWORD) : LONGWORD ;
+
+
+(*
+   WriteLong - writes the long out in hex characters.
+*)
+
+PROCEDURE WriteLong (l: LONGWORD) ;
+
+
+(*
+   WriteShort - writes the short out in hex characters.
+*)
+
+PROCEDURE WriteShort (s: SHORTWORD) ;
+
+
+
+END WordSizes.

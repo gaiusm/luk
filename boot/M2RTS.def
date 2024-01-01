@@ -1,0 +1,64 @@
+DEFINITION MODULE M2RTS ;
+
+(*
+   Author     : Gaius Mulley
+   Title      : M2RTS
+   Date       : Wed Jun 20 15:21:04 BST 1990
+   Description: Implements the Run Time System facilities of Modula-2.
+   Last update: Wed Jun 20 15:21:39 BST 1990
+*)
+
+EXPORT QUALIFIED HALT, InstallTerminationProcedure, Terminate,
+                 ExitOnHalt,
+                 SubrangeAssignmentError, ArraySubscriptError ;
+
+
+(*
+   HALT - terminate the current program calling creating a core dump.
+          The procedure Terminate is called before the core dump is
+          created.
+*)
+
+PROCEDURE HALT ;
+
+
+(*
+   SubrangeAssignmentError - part of the runtime checking, called if a
+                             subrange variable is just about to be assigned an illegal value.
+*)
+
+PROCEDURE SubrangeAssignmentError (file: ARRAY OF CHAR; line: CARDINAL) ;
+
+
+(*
+   ArraySubscriptError -  part of the runtime checking, called if an
+                          array indice is out of range.
+*)
+
+PROCEDURE ArraySubscriptError (file: ARRAY OF CHAR; line: CARDINAL) ;
+
+
+(*
+   ExitOnHalt - if HALT is executed then call exit with the exit code, e.
+*)
+
+PROCEDURE ExitOnHalt (e: INTEGER) ;
+   
+
+(*
+   InstallTerminationProcedure - installs a procedure, p, which will
+                                 be called when the procedure Terminate
+                                 is ionvoked.
+*)
+
+PROCEDURE InstallTerminationProcedure (p: PROC) ;
+
+
+(*
+   Terminate - calls each installed termination procedure in turn.
+*)
+
+PROCEDURE Terminate ;
+
+
+END M2RTS.

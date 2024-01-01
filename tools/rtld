@@ -1,0 +1,123 @@
+#!/bin/sh
+#
+# rtld - front end to ld - it double checks the version
+#        This may seem pedantic - but the change in linker cost me a day
+#        trying to figure why the RTS failed to boot!
+#
+
+TEXTSTART=0
+OBJS=""
+SCRIPTNAME=$0
+
+
+function parseArgs () {
+   while [ $# -gt 0 ] ; do
+      if [ "$1" = "-low" ] ; then
+         TEXTSTART=0
+      elif [ "$1" = "-high" ] ; then
+         TEXTSTART=1M
+      else
+         OBJS="$OBJS $1"
+      fi
+      shift
+   done
+}
+
+
+function getLinkCommand () {
+    if [ "`ld -v`" = "ld version 2.5.2 (with BFD 2.5)" ] ; then
+       # ensure that _start lives at location 0  - (32 bytes used for header info which we ignore)
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -qmagic -Ttext 0xffffffe0 -m486
+       else
+           echo ld -N -qmagic -Ttext 0x0100000 -m486
+       fi
+    elif [ "`ld -v`" = "GNU ld version 2.9.1 (with BFD 2.9.1.0.4)" ] ; then
+       # ensure that _start lives at location 0
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -qmagic -Ttext 0x0 -m486
+       else
+           echo ld -N -qmagic -Ttext 0x0100000 -m486
+       fi
+    elif [ "`ld -v`" = "ld version 2.5.2.6 (with BFD 2.5)" ] ; then
+       # ensure that _start lives at location 0  - (32 bytes used for header info which we ignore)
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -qmagic -Ttext 0xffffffe0 -m486
+       else
+           echo ld -N -qmagic -Ttext 0x0100000 -m486
+       fi
+    elif [ "`ld -v`" = "GNU ld version 2.8.1 (with BFD linux-2.8.1.0.1)" ] ; then
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0x0       -static -m486
+       else
+           echo ld -N -Ttext 0x0100000 -static  -m486
+       fi
+    elif [ "`ld -v`" = "GNU ld version cygnus-2.8.1 (with BFD linux-2.8.1.0.15)" ] ; then
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0x0 -static -m486
+       else
+           echo ld -N -Ttext 0x0100000 -static -m486
+       fi
+    elif [ "`ld -v`" = "ld version 2.6 (with BFD 2.6)" ] ; then
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0xffffffe0 -static -dll-verbose -m486
+       else
+           echo ld -N -Ttext 0x0100000 -static -dll-verbose -m486
+       fi
+    elif [ "`ld -v`" = "GNU ld version 2.9.1 (with BFD 2.9.1.0.15)" ] ; then
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0xffffffe0 -static  -m486
+       else
+           echo ld -N -Ttext 0x0100000 -static  -m486
+       fi
+    elif [ "`ld -v`" = "ld version cygnus/linux-2.5.2l.17 (with BFD cygnus/linux-2.5.2l.11)" ] ; then
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0x0 -static -dll-verbose -m486
+       else
+           echo ld -N -Ttext 0x0100000 -static -m486
+       fi
+    elif [ "`ld -v | grep version`" = "GNU ld version 2.9.1 (with BFD 2.9.1.0.23)" ] ; then
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0x0 -static -m486
+       else
+           echo ld -N -Ttext 0x0100000 -static -m486
+       fi
+    elif [ "`ld -v | grep version`" = "GNU ld version 2.9.1 (with BFD 2.9.1.0.24)" ] ; then
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0x0 -static -m486
+       else
+           echo ld -N -Ttext 0x0100000 -static -m486
+       fi
+    elif [ "`ld -v | grep version`" = "GNU ld version 2.9.5 (with BFD 2.9.5.0.37)" ] ; then
+       if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0x0 -static -m486
+       else
+           echo ld -N -Ttext 0x0100000 -static -m486
+       fi
+    elif [ "`ld -v | grep version`" = "GNU ld version 2.9.5 (with BFD 2.9.5.0.31)" ] ; then
+	if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0x0 -static -m486
+	else
+           echo ld -N -Ttext 0x0100000 -static -m486
+	fi
+    elif [ "`ld -v | grep version`" = "GNU ld version 2.12.90.0.1 20020307 Debian/GNU Linux" ] ; then
+	if [ "$TEXTSTART" = "0" ] ; then
+           echo ld -N -Ttext 0x0 -static -m486
+	else
+           echo ld -N -Ttext 0x0100000 -static -m486
+	fi
+    else
+       echo "echo Warning I presume you are using an older linker - check _start symbol is at 0 using -M.\n You might be able to use: ld -N -Ttext 0x0 -static -dll-verbose -m486\n check the rtld script in: $SCRIPTNAME"
+    fi
+}
+
+
+function link () {
+    COMMAND=`getLinkCommand`
+    $COMMAND $OBJS
+}
+
+
+parseArgs $*
+link
+

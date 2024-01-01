@@ -1,0 +1,156 @@
+DEFINITION MODULE AOUT ;
+
+(*
+    Title      : AOUT
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Tue Jun 14 21:09:57 1994
+    Last edit  : Tue Jun 14 21:09:57 1994
+    Description: provides an interface to the aout.h structures.
+*)
+
+FROM SYSTEM IMPORT BYTE, ADDRESS ;
+
+EXPORT QUALIFIED Examine,
+                 IsProcessor16Bit,
+                 GetByteFromText, GetByteFromData,
+                 FillFromText, FillFromData,
+                 GetTextPhysicalAddress, GetDataPhysicalAddress,
+                 GetTextVirtualAddress, GetDataVirtualAddress,
+                 GetDataPhysicalSize, GetDataVirtualSize,
+                 GetTextPhysicalSize, GetTextVirtualSize,
+                 GetBssVirtualSize, GetBssVirtualAddress,
+                 DebugFile ;
+
+
+(*
+   Examine - opens a binary object file. It returns true if
+             successful and false if not.
+*)
+
+PROCEDURE Examine (File: ARRAY OF CHAR) : BOOLEAN ;
+
+
+(*
+   IsProcessor16Bit - returns TRUE if the processor specified in
+                      the exec header is a 16 bit processor.
+*)
+
+PROCEDURE IsProcessor16Bit () : BOOLEAN ;
+
+
+(*
+   GetByteFromText - fills in byte, b, with the next text byte and
+                     returns true if successful.
+*)
+
+PROCEDURE GetByteFromText (VAR b: BYTE) : BOOLEAN ;
+
+
+(*
+   GetByteFromData - fills in byte, b, with the next data byte and
+                     returns true if successful.
+*)
+
+PROCEDURE GetByteFromData (VAR b: BYTE) : BOOLEAN ;
+
+
+(*
+   FillFromText - fills in a region of memory, Start..Start+Size-1 with
+                  bytes from the text region.
+                  The total number of bytes filled is returned.
+*)
+
+PROCEDURE FillFromText (Start: ADDRESS; Size: CARDINAL) : CARDINAL ;
+
+
+(*
+   FillFromData - fills in a region of memory, Start..Start+Size-1 with
+                  bytes from the data region.
+                  The total number of bytes filled is returned.
+*)
+
+PROCEDURE FillFromData (Start: ADDRESS; Size: CARDINAL) : CARDINAL ;
+
+
+(*
+   GetTextPhysicalAddress - returns the current text physical address.
+*)
+
+PROCEDURE GetTextPhysicalAddress () : CARDINAL ;
+
+
+(*
+   GetDataPhysicalAddress - returns the current data physical address.
+*)
+
+PROCEDURE GetDataPhysicalAddress () : CARDINAL ;
+
+
+(*
+   GetTextVirtualAddress - returns the current text virtual address.
+*)
+
+PROCEDURE GetTextVirtualAddress () : CARDINAL ;
+
+
+(*
+   GetDataVirtualAddress - returns the current data virtual address.
+*)
+
+PROCEDURE GetDataVirtualAddress () : CARDINAL ;
+
+
+(*
+   GetDataPhysicalSize - returns the physical size of the data.
+*)
+
+PROCEDURE GetDataPhysicalSize () : CARDINAL ;
+
+
+(*
+   GetDataVirtualSize - returns the virtual data size.
+*)
+
+PROCEDURE GetDataVirtualSize () : CARDINAL ;
+
+
+(*
+   GetTextPhysicalSize - returns the physical size of the data.
+*)
+
+PROCEDURE GetTextPhysicalSize () : CARDINAL ;
+
+
+(*
+   GetTextVirtualSize - returns the virtual data size.
+*)
+
+PROCEDURE GetTextVirtualSize () : CARDINAL ;
+
+
+(*
+   GetBssVirtualSize - returns the physical size of the
+                       bss.
+*)
+
+PROCEDURE GetBssVirtualSize () : CARDINAL ;
+
+
+(*
+   GetBssVirtualAddress - returns the physical size of the
+                          bss.
+*)
+
+PROCEDURE GetBssVirtualAddress () : CARDINAL ;
+
+
+(*
+   DebugFile - places the current analysis of the current file into
+               debug mode.
+*)
+
+PROCEDURE DebugFile ;
+
+
+END AOUT.

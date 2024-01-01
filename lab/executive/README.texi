@@ -1,0 +1,7 @@
+@section executive
+
+In this exercise you should complete the functions Resume and Wait
+in the executive.
+
+There is an initial attempt of Executive.c in this directory and this can
+be built using the generic building instructions found in this document.

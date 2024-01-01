@@ -1,0 +1,346 @@
+#
+# ================
+# Makefile for luk
+# ================
+#
+# You can configure the microkernel building in the following lines of code
+#
+#
+# uncomment _one_ of the following APPLICATIONs to build an appropriate microkernel
+#
+APPLICATION=hello
+# APPLICATION=debug
+# APPLICATION=scn
+# APPLICATION=boundedbuffer
+# APPLICATION=executive
+# APPLICATION=timerhandler
+# APPLICATION=processes
+# APPLICATION=combined
+#
+# set USBDEVICE to your usb device
+#
+USBDEVICE=/dev/rawusb
+#
+#  to enable remote debugging using gdb and a RS232 serial cable use:
+#
+# REMOTEDEBUG=-g
+#
+#  to switch off remote debugging use
+#
+# REMOTEDEBUG=
+#
+REMOTEDEBUG=
+#
+#   ***  leave the following lines of code alone  ***
+#
+
+SHELL=/bin/bash
+
+DISTFILES = boot C ch configure configure.in \
+            COPYING def doc GAS \
+            .gdbinit.in gdbinit.in \
+            lab Makefile.in mod README tools \
+            version.c
+
+prefix= @prefix@
+srcdir= @srcdir@
+mandir= @mandir@
+exec_prefix=@exec_prefix@
+bindir= @bindir@
+datarootdir= @datarootdir@
+m2flibs=$(datarootdir)/m2f/libraries
+
+LUKFLAGS=-fno-exceptions
+GM2FLAGS=-g -fsoft-check-all
+GCCFLAGS=-g
+
+GM2=gm2
+GCC=gcc
+X86=x86-m2-bas
+AS86=as86
+LD86=ld86
+GM2LGEN=$(strip $(shell find /usr/lib/gm2 -name 'gm2lgen' -print | head -1))
+
+TEXI2HTML=python3 $(srcdir)/www-tools/texi2tr/src/texi2tr.py
+
+FIRST=first
+SECOND=second
+COMPONENTS=$(FIRST) $(SECOND) $(APPLICATION).third
+TOOLS=load cons
+LOADOBJECTS=tools/ELF.o tools/AOUT.o tools/WordSizes.o tools/MemUtils.o
+
+LUKSOURCES = M2RTS.mod ASCII.mod SYSTEM.mod \
+             NumberIO.mod StrIO.mod StdIO.mod osinit.mod \
+             StrLib.mod OSParameters.mod Storage.mod \
+             ColourText.mod Dump.mod PortIO.mod MonStrIO.mod \
+             InterruptVector.mod IRQ.mod libg.mod WordSizes.mod \
+             Exceptions.mod DeviceConfiguration.mod \
+             WindowDevice.mod TTIO.mod \
+             KeyBoardConvert.mod KeyBoardLEDs.mod NonAscii.mod \
+             Colours.mod ClockDevice.mod
+
+ifeq ($(APPLICATION),hello)
+CLUKSOURCES =
+LUKSOURCES += Scn.mod Executive.mod Debug.mod BufferDevice.mod
+MAIN = x86_32/hello.o
+endif
+
+ifeq ($(APPLICATION),processes)
+CLUKSOURCES =
+LUKSOURCES += Scn.mod Executive.mod Debug.mod BufferDevice.mod
+MAIN = x86_32/processes.o
+endif
+
+ifeq ($(APPLICATION),debug)
+CLUKSOURCES = Debug.c
+LUKSOURCES += Scn.mod Executive.mod BufferDevice.mod
+MAIN = x86_32/hello.o
+endif
+
+ifeq ($(APPLICATION),scn)
+CLUKSOURCES = Scn.c
+LUKSOURCES += Executive.mod Debug.mod BufferDevice.mod
+MAIN = x86_32/hello.o
+endif
+
+ifeq ($(APPLICATION),boundedbuffer)
+CLUKSOURCES = BufferDevice.c
+LUKSOURCES += Scn.mod Executive.mod Debug.mod
+MAIN = x86_32/processes.o
+endif
+
+ifeq ($(APPLICATION),executive)
+CLUKSOURCES = Executive.c
+LUKSOURCES += Scn.mod Debug.mod BufferDevice.mod
+MAIN = x86_32/processes.o
+endif
+
+ifeq ($(APPLICATION),timerhandler)
+CLUKSOURCES = TimerHandler.c
+LUKSOURCES += Executive.mod Scn.mod Debug.mod BufferDevice.mod
+MAIN = x86_32/processes.o
+endif
+
+ifeq ($(APPLICATION),combined)
+CLUKSOURCES = TimerHandler.c Executive.c Scn.c Debug.c BufferDevice.c
+LUKSOURCES +=
+MAIN = x86_32/processes.o
+endif
+
+LUKOBJECTS= x86_32/crt0.o x86_32/Descriptors.o \
+            x86_32/MemRegion.o x86_32/initsubsystem.o \
+            $(LUKSOURCES:%.mod=x86_32/%.o) \
+            $(CLUKSOURCES:%.c=x86_32_C/%.o) \
+            x86_32/mod_init.o x86_32/gdb.o x86_32/libc.o \
+            $(MAIN)
+
+all: image
+
+documentation: luk.pdf luk.ps luk.html texi2tr.css
+
+luk.pdf: luk.ps
+	gs -q -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sOutputFile=$@ $<
+
+luk.ps: luk.dvi
+	dvips -o $@ $<
+
+luk.dvi: luk-libs.texi $(srcdir)/doc/luk.texi
+	texi2dvi -I $(srcdir)/ $(srcdir)/doc/luk.texi
+
+luk-libs.texi:  force
+	python3 $(srcdir)/tools/h2texi.py -u"LUK Modules" -s$(srcdir) > luk-libs.texi
+
+texi2tr.css: $(srcdir)/www-tools/texi2tr/html/texi2tr.css
+	cp $< $@
+
+luk.html: luk-libs.texi $(srcdir)/doc/luk.texi
+	cp $(srcdir)/www-tools/texi2tr/html/*.html .
+	cp $(srcdir)/www-tools/texi2tr/png/*png .
+	$(TEXI2HTML) -T$(srcdir)/www-tools/texi2tr/html -n -I.:$(srcdir)/doc:$(srcdir) -b luk-%d.html -r luk.html luk.texi
+
+bootusb: force
+	@if [ "`hostname`" = "mcgreg" ] ; then \
+            echo "this command needs to be executed from the client and not on mcgreg" ; \
+        else \
+            $(srcdir)/tools/copyimage image $(USBDEVICE) ; \
+        fi
+
+image: dirs $(TOOLS) $(COMPONENTS)
+	./load -v $(REMOTEDEBUG) -o image $(VERBOSE) -Mi+d -0 first -1 -Mi-d=bss second -Mi+d -stack 1M $(APPLICATION).third > image.debug
+
+x86_32/crt0.o:  $(srcdir)/GAS/crt0.S
+	gcc -D__ASSEMBLY__ -E $< | as --32 -o $@
+
+x86_32/Descriptors.o:  $(srcdir)/GAS/Descriptors.S
+	gcc -D__ASSEMBLY__ -E $< | as --32 -o $@
+
+x86_32/MemRegion.o:  $(srcdir)/GAS/MemRegion.S
+	gcc -D__ASSEMBLY__ -E $< | as --32 -o $@
+
+x86_32/initsubsystem.o:  $(srcdir)/C/initsubsystem.c
+	gcc $(GCCFLAGS) -m32 -c -o $@ $<
+
+x86_32/gdb.o: $(srcdir)/C/i386-stub.c $(srcdir)/C/m2.h
+	gcc $(GCCFLAGS) -m32 -c -o $@ $<
+
+x86_32/libc.o: $(srcdir)/C/libc.c
+	gcc $(GCCFLAGS) -m32 -c -o $@ $<
+
+x86_32/crt0.s:  $(srcdir)/GAS/crt0.S
+	gcc -D__ASSEMBLY__ -E $< | as -al=x86_32/crt0.s --32 -o x86_32/crt0.o
+
+x86_32/mod_init.o: force
+	$(GM2LGEN) -main start_kernel -exit $(srcdir)/lab/$(APPLICATION)/init > mod_init.c
+	gcc $(GCCFLAGS) -m32 -c -o x86_32/mod_init.o mod_init.c
+
+x86_32/%.o:  $(srcdir)/mod/%.mod
+	$(GM2) -o $@ $(GM2FLAGS) $(LUKFLAGS) -c -m32 -I.:$(srcdir)/def:$(srcdir)/boot:$(srcdir)/tools $<
+
+x86_32/OSParameters.o: $(srcdir)/boot/OSParameters.mod
+	$(GM2) -o $@ $(GM2FLAGS) $(LUKFLAGS) -c -m32 -I.:$(srcdir)/def:$(srcdir)/boot $<
+
+x86_32/WordSizes.o: $(srcdir)/tools/WordSizes.mod
+	$(GM2) -o $@ $(GM2FLAGS) $(LUKFLAGS) -c -m32 -I.:$(srcdir)/def:$(srcdir)/boot:$(srcdir)/tools $<
+
+$(APPLICATION).third:  $(LUKOBJECTS)
+	ld -T$(srcdir)/tools/ld-script.h -M -m elf_i386 -N -static -o $(APPLICATION).third $(LUKOBJECTS) > map
+
+cons: $(srcdir)/tools/cons.c
+	gcc -g -o $@ $<
+
+load: $(LOADOBJECTS)
+	$(GM2) -o $@ $(GM2FLAGS) -I$(srcdir)/tools $(srcdir)/tools/load.mod $(LOADOBJECTS)
+
+tools/load.o:  $(srcdir)/tools/load.mod
+	$(GM2) -o $@ -I$(srcdir)/tools $(GM2FLAGS) -c $<
+
+tools/ELF.o:  $(srcdir)/tools/ELF.mod
+	$(GM2) -o $@ -I$(srcdir)/tools $(GM2FLAGS) -c $<
+
+tools/AOUT.o:  $(srcdir)/tools/AOUT.mod
+	$(GM2) -o $@ -I$(srcdir)/tools $(GM2FLAGS) -c $<
+
+tools/WordSizes.o:  $(srcdir)/tools/WordSizes.mod
+	$(GM2) -o $@ -I$(srcdir)/tools $(GM2FLAGS) -c $<
+
+tools/MemUtils.o:  $(srcdir)/tools/MemUtils.mod
+	$(GM2) -o $@ -I$(srcdir)/tools $(GM2FLAGS) -c $<
+
+odx:  $(srcdir)/tools/od.mod
+	$(GM2) -o $@ -I$(srcdir)/tools $(GM2FLAGS) $<
+
+dis:  $(srcdir)/tools/dis.mod # $(DISOBJECTS)
+	$(GM2) -o $@ -I$(srcdir)/tools $(GM2FLAGS) $<
+
+first: x86_16/boot.o x86_16/minbios.o
+	$(LD86) -0 -s x86_16/boot.o x86_16/minbios.o -o $@
+
+x86_16/boot.o: $(srcdir)/boot/BAS/boot.S
+	$(AS86) -l x86_16/boot.s -0 -a $(srcdir)/boot/BAS/boot.S -o $@
+
+x86_16/minbios.o: $(srcdir)/boot/BAS/minbios.S
+	$(AS86) -l x86_16/minbios.s -0 -a $(srcdir)/boot/BAS/minbios.S -o $@
+
+x86_16/bios.o: $(srcdir)/boot/BAS/bios.S
+	$(AS86) -l x86_16/bios.s -0 -a $(srcdir)/boot/BAS/bios.S -o $@
+
+x86_16/brt0.o: $(srcdir)/boot/BAS/brt0.S
+	$(AS86) -l x86_16/brt0.s -0 -a $(srcdir)/boot/BAS/brt0.S -o $@
+
+x86_16/go32.o: $(srcdir)/boot/BAS/go32.S
+	$(AS86) -l x86_16/go32.s -0 -a $< -o $@
+
+second: x86_16/brt0.o x86_16/go32.o x86_16/minbios.o x86_16/bios.o x86_16/second.o x86_16/M2RTS.o
+	$(LD86) -i -0 -s -o $@ x86_16/brt0.o x86_16/go32.o x86_16/second.o x86_16/minbios.o x86_16/bios.o x86_16/M2RTS.o
+
+dirs: x86_16 x86_32 x86_32_C tools
+
+tools: force
+	mkdir -p $@
+
+x86_32: force
+	mkdir -p $@
+
+x86_32_C: force
+	mkdir -p $@
+
+x86_16: force
+	mkdir -p $@
+
+x86_16/%.o: x86_16/%.s
+	$(AS86) -O -j -w -a -0 $< -o $@
+
+x86_16/%.s: $(srcdir)/boot/%.mod
+	$(X86) -Oallhlo -mcpu=8086 -mcpu=nomath -I$(m2flibs):$(srcdir)/boot $< -o $@
+
+x86_32/hello.o: $(srcdir)/lab/hello/hello.mod
+	$(GM2) -o $@ $(GM2FLAGS) $(LUKFLAGS) -c -m32 -I.:$(srcdir)/def:$(srcdir)/boot:$(srcdir)/tools $<
+
+x86_32/processes.o: $(srcdir)/lab/processes/processes.mod
+	$(GM2) -o $@ $(GM2FLAGS) $(LUKFLAGS) -c -m32 -I.:$(srcdir)/def:$(srcdir)/boot:$(srcdir)/tools $<
+
+x86_32_C/Debug.o: $(srcdir)/lab/debug/Debug.c
+	gcc $(GCCFLAGS) -m32 -c -o $@ $<
+
+x86_32_C/Executive.o: $(srcdir)/lab/executive/Executive.c
+	gcc $(GCCFLAGS) -m32 -c -o $@ $<
+
+x86_32_C/TimerHandler.o: $(srcdir)/lab/timerhandler/TimerHandler.c
+	gcc $(GCCFLAGS) -m32 -c -o $@ $<
+
+x86_32_C/BufferDevice.o: $(srcdir)/lab/boundedbuffer/BufferDevice.c
+	gcc $(GCCFLAGS) -m32 -c -o $@ $<
+
+x86_32_C/Scn.o: $(srcdir)/lab/scn/Scn.c
+	gcc $(GCCFLAGS) -m32 -c -o $@ $<
+
+install: force
+	exit 0
+	echo "install rule not yet written --fixme--"
+	for i in x86-m2-gas x86-m2-bas x86-m2-masm ; do \
+            install -m 755 $$i $(bindir)/$$i ; \
+        done
+	mkdir -p $(m2flibs)
+	for i in x $(srcdir)/libraries/*.{def,mod,c,h} ; do \
+	    if [ -f $$i ] ; then \
+		install $$i $(m2flibs)/`basename $$i` ; \
+	    fi ; \
+	done
+
+clean: force
+	$(RM) config.log config.cache config.status
+	$(RM) x86_32/* x86_16/* first second *.third
+	$(RM) x86_32_C/* tools/* luk-libs.texi
+
+distclean: clean force
+	$(RM) Makefile
+
+studentrelease: force
+	echo student-luk-`sed -e '/version_string/!d' \
+          -e 's/[^0-9.]*\([0-9.]*\).*/\1/' -e q $(srcdir)/version.c` > .fname
+	-rm -rf `cat .fname`
+	mkdir `cat .fname`
+	dst=`cat .fname`; for f in $(DISTFILES); do \
+           cp -rp $(srcdir)/$$f $$dst/$$f ;\
+        done ; \
+        find $$dst -name '*~' -exec rm -f {} \; ;\
+	lst=`find $$dst -type f -exec grep -il "remove for student" {} \; -print` ;\
+	for f in $$lst ; do \
+           sed -e '/remove for student/d' $$f > /tmp/t ;\
+           cp /tmp/t $$f ;\
+        done
+	tar --gzip -chf `cat .fname`.tar.gz `cat .fname`
+	-rm -rf `cat .fname` .fname
+
+release: force
+	echo luk-`sed -e '/version_string/!d' \
+          -e 's/[^0-9.]*\([0-9.]*\).*/\1/' -e q $(srcdir)/version.c` > .fname
+	-rm -rf `cat .fname`
+	mkdir `cat .fname`
+	dst=`cat .fname`; for f in $(DISTFILES); do \
+           cp -rp $(srcdir)/$$f $$dst/$$f ; \
+        done
+	tar --gzip -chf `cat .fname`.tar.gz `cat .fname`
+	-rm -rf `cat .fname` .fname
+
+force:

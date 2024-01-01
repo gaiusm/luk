@@ -1,0 +1,47 @@
+DEFINITION MODULE MonStrIO ;
+
+(*
+   Title      : MonStrIO
+   Author     : Gaius Mulley
+   Date       : 16/8/87
+   LastEdit   : 12/8/94
+   System     : LOGITECH MODULA-2/86 & (RTS GM2)
+   Description: Provides a method of writting text to a screen that is
+                unbuffered and process independant.
+*)
+
+
+FROM StdIO IMPORT ProcWrite ;
+
+EXPORT QUALIFIED DebuggingStream,
+                 WriteString,
+                 WriteLn, WriteCard, WriteHex,
+                 WriteBin, WriteInt,
+                 Init ;
+
+
+
+PROCEDURE DebuggingStream (p: ProcWrite) ;
+
+PROCEDURE WriteLn ;
+
+PROCEDURE WriteString (a: ARRAY OF CHAR) ;
+
+PROCEDURE WriteCard (x, n: CARDINAL) ;
+
+PROCEDURE WriteHex (x, n: CARDINAL) ;
+
+PROCEDURE WriteBin (x, n: CARDINAL) ;
+
+PROCEDURE WriteInt (x: INTEGER; n: CARDINAL) ;
+
+
+(*
+   Init - sets the DebuggingStream to use Scn.Write.
+          Should only be called by M2RTS.
+*)
+
+PROCEDURE Init ;
+
+
+END MonStrIO.

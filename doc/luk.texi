@@ -1,0 +1,313 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename luk.info
+@set version-luk     1.0.3
+@set updated-last    2011-11-24
+@settitle GNU lean microkernel @value{version-luk}
+@c %**end of header
+
+@syncodeindex pg cp
+
+@copying
+This manual is for GNU lean microkernel
+(version @value{version-luk}, @value{updated-last}).
+
+Copyright @copyright{} 2011 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License.''
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
+@end quotation
+@end copying
+
+@dircategory Texinfo documentation system
+@direntry
+* luk: (luk)Lean micro kernel.
+@end direntry
+
+@titlepage
+@title GNU lean microkernel (LUK)
+@subtitle for version @value{version-luk}, @value{updated-last}
+@author Gaius Mulley <@email{gaius@@gnu.org}>
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top, , (dir), (dir)
+@top GNU LUK
+
+@insertcopying
+@end ifnottex
+
+@menu
+* About:: What is GNU LUK.
+* Obtaining:: Obtaining GNU LUK.
+* Dependencies:: Package dependencies.
+* Building:: Building and configuring LUK.
+* Lab exercises:: Lab exercises using LUK.
+* Licence::          Licence of GNU LUK.
+* GNU Project::      The GNU Project and GNU/Linux.
+* Libraries:: Libraries available in LUK.
+* Indices:: Content and function indices.
+@end menu
+
+@menu
+* News:: News.
+* Development:: Development.
+* Community:: Community.
+@end menu
+
+@node News, Development, , (dir)
+@chapter News
+
+No news is good news.
+
+@node Development, Community, News, (dir)
+@section Development
+
+If you are interesting in contributing please contact
+@email{gaius@@gnu.org}.
+
+@node Community, , Development, (dir)
+
+
+@node About, Obtaining, (dir), (dir)
+@chapter About LUK
+
+LUK is a lean microkernel whose primary purpose is to teach the
+principles of microkernels.  It runs on x86_32 PC hardware and
+boots from a USB memory stick.  When it boots it is the sole
+system, there is no linux, windows or OSX.
+
+LUK is written in C, Modula-2 and assembly language.  All the lab
+exercises are available in C and (or Modula-2) students can study the
+microkernel in either language if desired.  Students do not need to
+be familiar with Modula-2 in order to complete the C lab exercises.
+
+LUK runs in 32 bit protected mode and can create an arbitary number
+of lightweight processes using the @code{Executive} module.
+It has a @code{Timerhandler} module for creating time related events
+a keyboard and screen device driver.  There is also a very primative
+text based window device.
+
+LUK coordinates interrupts and processes via semaphores implemented in
+the @code{Executive}.  It currently uses a simple round robin
+scheduler to allocate processor time to the runnable processes.
+
+@node Obtaining, Building, About, (dir)
+@chapter Obtaining LUK
+
+You can download a copy LUK from
+@uref{http://floppsie.comp.glam.ac.uk/download/luk/student-luk-@value{version-luk}.tar.gz}
+and extract the archive contents.  Both the download and extraction
+can be done from the command line:
+
+@example
+$ rm -f student-luk-@value{version-luk}.tar.gz
+$ wget http://floppsie.comp.glam.ac.uk/download/luk/student-luk-@value{version-luk}.tar.gz
+$ tar xvf student-luk-@value{version-luk}.tar.gz
+@end example
+
+@node Dependencies, Building, Obtaining, (dir)
+@section Dependencies
+
+LUK requires the following packages to be installed.  You do not need
+to perform any of these commands if you are using LUK in a laboratory
+at Glamorgan.
+
+The GNU C compiler @file{gcc}, GNU Modula-2 @file{gm2}, GNU make
+@file{make}, GNU binutils @file{binutils}, @file{x86-m2} and Bruce Evan's
+assembler (@file{bin86}).
+
+Assuming that you are on a Debian or Ubuntu based system you could
+obtain @file{gm2} and @file{x86-m2} by adding these entries to
+your @file{/etc/apt/sources.list}.
+
+@example
+#
+#  GNU Modula-2 repo
+#
+
+deb http://floppsie.comp.glam.ac.uk/debian/ squeeze main 
+deb-src http://floppsie.comp.glam.ac.uk/debian/ squeeze main
+@end example
+
+Now they can be installed by using the following commands:
+
+@example
+$ sudo apt-get update
+$ sudo apt-get install bin86 libc6-dev-i386 gm2 gcc x86-m2
+@end example
+
+@node Building, Lab exercises, Dependencies, (dir)
+
+You can configure LUK by:
+
+@example
+$ mkdir -p build-luk $HOME/opt
+$ cd build-luk
+$ ../student-luk-@value{version-luk}/configure --prefix=/usr
+@end example
+
+The above must be done if any change in
+@file{student-luk-@value{version-luk}/Makefile.in} is made.  For example in
+order to undertake the various lab exercises you will need to set the
+@code{APPLICATION} variable inside @file{Makefile.in}.
+
+It would be sensible to now check which directory you are in via:
+
+@example
+$ pwd
+@end example
+
+Write down the output of @code{pwd} as you will need to come back to
+this directory next time to work on LUK.
+
+To build LUK type:
+
+@example
+$ make
+@end example
+
+Once this compiles cleanly the LUK image needs to be placed onto a usb
+memory stick.  Note that this will @strong{completely trash} the usb
+memory stick!  You can reuse the memory stick of course - but it will
+require reformatting.  Please use a spare memory stick and physically
+mark it to avoid any mistakes!
+
+@c At the University of Glamorgan you cannot execute the follow command
+@c on the mcgreg server (via ltsp client).  For now it is better to
+@c use an Ubuntu machine to perform the commands:
+
+To place the LUK image onto the usb memory stick you can either use an
+Ubuntu client (in J204/J202/J208/J210) or if you are in J203 switch to
+the console of the ltsp client.
+
+The ltsp console can be activated by pressing @code{<alt><ctrl><f1>}.
+You can switch back to the graphics mode via @code{<alt><f7>}.
+Assuming you are now at the console on the ltsp client, login and
+change to the correct directory.
+
+@example
+cd @file{build directory you wrote down}
+make bootusb
+@end example
+
+Notice that you will need to modify your @file{build-luk/Makefile}
+to reflect the usb device (most likely @file{/dev/sdb}).
+Open up @file{build-luk/Makefile} in your favourite editor and
+change the line:
+
+@example
+# set USBDEVICE to your usb device
+#
+USBDEVICE=/dev/rawusb
+@end example
+
+to
+
+@example
+# set USBDEVICE to your usb device
+#
+USBDEVICE=/dev/sdb
+@end example
+
+or the appropriate device.  You should be able to see the device by
+typing the following at the command line:
+
+@example
+$ df -h
+/dev/sdb      1424   1381    43  97% /media/foobar
+@end example
+
+which indicates the @file{/dev/sdb} is mounted onto @file{/media/foobar}.
+
+You will be prompted to press enter to confirm that you are about to
+trash the contents of the usb memory stick and then it will place LUK
+onto the device.  Now find an unused computer in and place the usb
+memory stick into the usb port and reboot the computer.  You should
+see some bios diagnostics and then some messages saying the micro
+kernel is coming to life.
+
+@node Lab exercises, Licence, News, (dir)
+@chapter Lab exercises
+
+The lab exercises are found under @file{student-luk-@value{version-luk}/lab}.
+For each lab exercise you will need to:
+
+@table @code
+@item (i)
+modify @file{student-luk-@value{version-luk}/Makefile.in} to reflect the
+exercise being undertaken.  This only needs to be done once.
+
+@item (ii)
+edit the appropriate file inside each lab directory and complete
+the code.  Now you need to go through the edit, compile, build, run
+cycle until the code is perfect!  Remember to @code{make bootdisk}
+every time you want to test your code!
+
+@end table
+
+Each sub section below corresponds to a sub directory under
+@file{student-luk-@value{version-luk}/lab}.
+
+@include lab/hello/README.texi
+@include lab/debug/README.texi
+@include lab/scn/README.texi
+@include lab/boundedbuffer/README.texi
+@include lab/executive/README.texi
+@include lab/timerhandler/README.texi
+@include lab/processes/README.texi
+@include lab/combined/README.texi
+
+@page
+
+@node Licence, GNU Project, Lab exercises, (dir)
+
+@include gpl-3.0.texi
+
+@node GNU Project, Libraries, Licence, (dir)
+
+@include gnu.texi
+
+@node Libraries, Indices, GNU Project, (dir)
+
+@page
+@section Luk header files
+@include luk-libs.texi
+
+@node Indices, , Libraries, (dir)
+@section Indices
+
+@ifhtml
+@menu
+* Contents::    Section and subsections.
+* Functions::   Function, constants, types, ebnf indices.
+@end menu
+
+@node Contents, Functions, ,
+@section Section and subsections
+@printindex cp
+
+@node Functions, , Contents, 
+@section Function, constants, types, ebnf indices.
+@end ifhtml
+
+@printindex fn
+
+@summarycontents
+@contents
+@bye

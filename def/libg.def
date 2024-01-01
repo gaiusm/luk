@@ -1,0 +1,26 @@
+DEFINITION MODULE libg ;
+
+(*
+    Title      : libg
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Sat Aug  5 20:14:54 1995
+    Last edit  : Sat Aug  5 20:14:54 1995
+    Description: provides very simple mechanism to communicate with GDB.
+*)
+
+EXPORT QUALIFIED Init, Read, Write ;
+
+
+(*
+   Init - initializes the libg module.
+*)
+
+PROCEDURE Init ;
+
+
+PROCEDURE Read (VAR ch: CHAR) ;
+PROCEDURE Write (ch: CHAR) ;
+
+
+END libg.

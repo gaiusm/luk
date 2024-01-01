@@ -1,0 +1,34 @@
+      IF (CurSector=0) AND
+         (01000H - (Segment MOD 01000H) >
+          ClicksPerSector * NoOfSectorsPerTrack)
+      THEN
+         (* whole track read at a time *)
+         ReadIt(Head, Drive, CurTrack, CurSector+1,
+                NoOfSectorsPerTrack, Segment, 0) ;
+         Head := 1-Head ;
+         INC(Segment, (NoOfSectorsPerTrack * ClicksPerSector) ) ;
+         DEC(NoOfSectors, NoOfSectorsPerTrack)
+      ELSE
+         (* read up until the start of next track *)
+         SectorsLeft := Min(NoOfSectorsPerTrack-CurSector,
+                            (01000H - (Segment MOD 01000H)) DIV
+                            ClicksPerSector) ;
+         IF SectorsLeft=0
+         THEN
+            SectorsLeft := 1    (* always read at least one sector *)
+         END ;
+         ReadIt(Head, Drive, CurTrack, CurSector+1,
+                SectorsLeft, Segment, 0) ;
+         DEC(NoOfSectors, SectorsLeft) ;
+         INC(Segment, SectorsLeft * ClicksPerSector) ;
+         CurSector := (CurSector + SectorsLeft) MOD NoOfSectorsPerTrack ;
+         IF CurSector=0
+         THEN
+            Head := 1-Head
+         END
+      END ;
+
+      IF (Head=0) AND (CurSector=0)
+      THEN
+         INC(CurTrack)
+      END

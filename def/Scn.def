@@ -1,0 +1,68 @@
+DEFINITION MODULE Scn ;
+
+
+EXPORT QUALIFIED Write, ClearScreen, MoveCursor,
+                 DeleteLine, AppendLine, ClearLine,
+                 Bell, Init ;
+
+
+(*
+   Write - writes character, ch, to the screen.
+           Write interprets cr, lf.
+*)
+
+PROCEDURE Write (ch: CHAR) ;
+
+
+(*
+   MoveCursor - moves the cursor to position, x, y.
+*)
+
+PROCEDURE MoveCursor (x, y: CARDINAL) ;
+
+
+(*
+   ClearScreen - clears the screen, filling it with spaces.
+*)
+
+PROCEDURE ClearScreen ;
+
+
+(*
+   ClearLine - clears line, y, filling it with spaces.
+*)
+
+PROCEDURE ClearLine (y: CARDINAL) ;
+
+
+(*
+   AppendLine - adds another line after, y, to the display, all the
+                other lines move down one line.
+*)
+
+PROCEDURE AppendLine (y: CARDINAL) ;
+
+
+(*
+   DeleteLine - deletes line, y, from the screen, the lower lines
+                move up to fill in the gap.
+*)
+
+PROCEDURE DeleteLine (y: CARDINAL) ;
+
+
+(*
+   Bell - rings the bell on the console.
+*)
+
+PROCEDURE Bell ;
+
+
+(*
+   Init - initialize all module data structures.
+*)
+
+PROCEDURE Init ;
+
+
+END Scn.

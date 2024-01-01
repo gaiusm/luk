@@ -1,0 +1,38 @@
+DEFINITION MODULE SerIOB ;
+
+(*
+   Title      : SerIOB
+   Author     : Gaius Mulley
+   Date       : 01/8/84
+   LastEdit   : 24/7/87
+   System     : LOGITECH MODULA-2/86
+   Description: Handles the serial data communication port on the IBM-PC.
+                Port Com 2
+*)
+
+FROM DeviceConfiguration IMPORT Parity ;
+
+EXPORT QUALIFIED Init,
+                 Read, Write ;
+
+
+
+(*
+   Init - Initializes the serial port to specific values.
+          The legal values for the parameters are:
+             BaudRate  : 300..9600
+             StopBits  : 1..2
+             WordLength: 5..8
+             Parity    : None, Odd, Even
+             XonXoff   : if TRUE then implement software flow control
+*)
+
+PROCEDURE Init (BaudRate, StopBits, WordLength: CARDINAL;
+                p: Parity; XoffXon: BOOLEAN) : BOOLEAN ;
+
+PROCEDURE Read (VAR ch: CHAR) ;
+
+PROCEDURE Write (ch: CHAR) ;
+
+
+END SerIOB.

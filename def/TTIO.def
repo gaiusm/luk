@@ -1,0 +1,50 @@
+DEFINITION MODULE TTIO ;
+
+(*
+    Title      : TTIO
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Thu Aug 25 13:25:50 1994
+    Last edit  : Thu Aug 25 13:25:50 1994
+    Description: provides a buffered Read from an interrupt
+                 driven keyboard driver.
+*)
+
+EXPORT QUALIFIED Read,
+                 SwitchLeds,
+                 SwitchScroll, SwitchNum, SwitchCaps ;
+
+
+PROCEDURE Read (VAR ch: CHAR) ;
+
+
+(*
+   SwitchLeds - switch the keyboard LEDs to the state defined
+                by the BOOLEAN variables. TRUE = ON.
+*)
+
+PROCEDURE SwitchLeds (NumLock, CapsLock, ScrollLock: BOOLEAN) ;
+
+
+(*
+   SwitchScroll - switchs the scroll LED on or off.
+*)
+
+PROCEDURE SwitchScroll (Scroll: BOOLEAN) ;
+
+
+(*
+   SwitchNum - switches the Num LED on or off.
+*)
+
+PROCEDURE SwitchNum (Num: BOOLEAN) ;
+
+
+(*
+   SwitchCaps - switches the Caps LED on or off.
+*)
+
+PROCEDURE SwitchCaps (Caps: BOOLEAN) ;
+
+
+END TTIO.

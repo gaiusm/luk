@@ -1,0 +1,1017 @@
+IMPLEMENTATION MODULE SerIOA ;
+
+(*
+    Title      : SerIOB
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Fri Sep  9 08:12:01 1994
+    Last edit  : Fri Sep  9 08:12:01 1994
+    Description: Contains a buffered Read and a buffered Write.
+                 Input operates under interrupt control, output
+                 is achieved by polling.
+                 Flow control implemented by XON XOFF
+
+                 NOTE:  there is a bug in the 8250 and 16450
+                        which will loose interrupts if both
+                        RX & TX ints are enabled at the same time.
+                        Hence this code enables TX ints when
+                        characters are to be sent.
+                        Then enables RX ints. when no characters are to be sent.
+                        We never have then enabled at the same time.
+                        (For future use - we should detect the 16550A and
+                         enable both ints. see EnableTxInts.
+                         Could also enable 16650A fifo as well.)
+*)
+
+IMPORT Scn ;
+
+FROM Kernel IMPORT Wait, Signal, SEMAPHORE, InitProcess, Resume,
+                   WaitForIO, InitSemaphore, ProcType, Suspend,
+                   PtrToProcDes, GetPriority, PutPriority,
+                   CurrentProcess, IsrSignal ;
+
+FROM SYSTEM IMPORT LISTEN, TurnInterrupts, OnOrOff,
+                   BYTE, BITSET ;
+
+FROM Debug IMPORT Halt ;
+FROM osinit IMPORT GetDebugging ;
+FROM PortIO IMPORT In8, Out8 ;
+FROM DeviceConfiguration IMPORT GetIrqNo ;
+FROM ASCII IMPORT dc1, dc3 ;
+IMPORT MonStrIO ;
+
+
+CONST
+   Debugging  = FALSE ;  (* To enable debugging messages           *)
+   StackSpace = 50000 ;  (* Allows a process a maximum of          *)
+                         (* StackSpace bytes for the driver        *)
+                         (* process.                               *)
+
+
+(* Set up constants for the ports that are accessed.               *)
+
+CONST
+   (* the following constant declaration may be modified to change *)
+   (* the module for the alternate communications adapter.         *)
+
+   Com1 = 1 ; (* = 1 means TRUE  or COM1 is used *)
+              (* = 0 means FALSE or COM2 is used *)
+
+   IrqBase= 020H ;   (* irq interrupts live from 020..030 *)
+
+   IOBase = 2F8H + Com1 * 100H;
+
+   LineContrReg    = IOBase+03H; (* to specify format of transmitted data  *)
+   LowBaudRateDiv  = IOBase+00H; (* lower byte of divisor                  *)
+   HighBaudRateDiv = IOBase+01H; (* higher byte of divisor                 *)
+   LineStatusReg   = IOBase+05H; (* holds status info on the data transfer *)
+   ReceiverReg     = IOBase+00H; (* received char is in this register      *)
+   TransmitReg     = IOBase+00H; (* char to send is to put in this reg     *)
+   IntEnableReg    = IOBase+01H; (* to enable the selected interrupt       *)
+   ModemContrReg   = IOBase+04H; (* controls the interface to a modem      *)
+   IntIdentReg     = IOBase+02H; (* Determines what caused interrupt.      *)
+   ModemStatusReg  = IOBase+06H; (* Determines status on the ctrl lines.   *)
+   ScratchReg      = IOBase+07H; (* Only available on some UARTs           *)
+   FifoControlReg  = IOBase+02H; (* Only available on some UARTs           *)
+
+   (* Line Status Registers Bits *)
+
+   DataReadyBit         = 00H ;
+   OverrunErrorBit      = 01H ;
+   ParityErrorBit       = 02H ;
+   FramingErrorBit      = 03H ;
+   BreakIndicatorBit    = 04H ;
+   TxHoldingRegEmptyBit = 05H ;
+   TxShiftRegEmptyBit   = 06H ;
+   FifoErrorBit         = 07H ;
+
+   (* Interrupt Enable Register Bits *)
+
+   EnableDataAvailableInt     = 00H ;
+   EnableTxHoldingRegEmptyInt = 01H ;
+   EnableStatusInt            = 02H ;
+   EnableModemStatusInt       = 03H ;
+
+   (* Interrupt identification register values *)
+   NoInterrupt                = {0} ;
+   CharacterErrorInterrupt    = {1, 2} ;    (* OE, PE, FE, BI    *)
+   DataReadyInterrupt         = {2} ;       (* character waiting *)
+   DataFifoInterrupt          = {2, 3} ;    (* no fifo action?   *)
+   TransmitInterrupt          = {1} ;
+   ModemInterrupt             = {} ;        (* must read msr     *)
+
+TYPE
+   TypeOfUART = (UartUnknown, Uart8250, Uart16450, Uart16550, Uart16550A) ;
+
+VAR
+   IrqNo     : CARDINAL ;
+   RCch      : CHAR ;   (* Character received *)
+   ShadowIIR,
+   CurrentIIR: BYTE ;   (* copies of interrupt enable reg *)
+   UseXonXoff: BOOLEAN ;
+   ThisUart  : TypeOfUART ;
+
+
+(*
+   DLAB - sets the DLAB bit to 0 or 1.
+*)
+
+PROCEDURE DLAB (Bit: CARDINAL) ;
+VAR
+   Status : BITSET ;
+   Byte   : CHAR ;
+BEGIN
+   Byte := In8( LineContrReg ) ;
+   Status := BITSET( ORD( Byte ) ) ;
+   IF Bit=1
+   THEN
+      INCL(Status, 7)
+   ELSE
+      EXCL(Status, 7)
+   END ;
+   Out8(LineContrReg, VAL(BYTE, Status))
+END DLAB ;
+
+
+(*
+   Init - Initializes the serial port to specific values.
+          The legal values for the parameters are:
+             BaudRate  : 300..38400
+             StopBits  : 1..2
+             WordLength: 5..8
+             XonXoff   : if TRUE then implement software flow control
+*)
+
+PROCEDURE Init (BaudRate, StopBits, WordLength: CARDINAL;
+                p: Parity; XoffXon: BOOLEAN) : BOOLEAN ;
+VAR
+   DivisorLow,
+   DivisorHigh: BYTE ;
+   Parameters : BITSET ;
+BEGIN
+   UseXonXoff := XoffXon ;
+   CASE BaudRate OF
+
+   300   : DivisorLow := 80H ;
+           DivisorHigh := 1H |
+
+   600   : DivisorLow := 0C0H ;
+           DivisorHigh := 0H |
+
+   1200  : DivisorLow := 60H ;
+           DivisorHigh := 0H |
+
+   2400  : DivisorLow := 30H ;
+           DivisorHigh := 0H |
+
+   4800  : DivisorLow := 18H ;
+           DivisorHigh := 0H |
+
+   9600  : DivisorLow := 0CH ;
+           DivisorHigh := 0H |
+
+   19200 : DivisorLow := 06H ;
+           DivisorHigh := 0H |
+
+   38400 : DivisorLow := 03H ;
+           DivisorHigh := 0H
+
+   ELSE
+      RETURN( FALSE )
+   END ;
+   (* load the Divisor of the baud rate generator: *)
+   DLAB(1) ;
+   Out8(HighBaudRateDiv, DivisorHigh) ;
+   Out8(LowBaudRateDiv, DivisorLow) ;
+   DLAB(0) ;
+
+   (* prepare the Parameters: *)
+   Parameters := {};
+   IF StopBits=2
+   THEN
+      INCL(Parameters, 2) ;
+   ELSIF StopBits#1
+   THEN
+      RETURN( FALSE )
+   END ;
+   IF (p=Odd) OR (p=Even)
+   THEN
+      INCL(Parameters, 3) ;
+      IF p=Even
+      THEN
+         INCL(Parameters, 4)
+      END
+   END ;
+   CASE WordLength OF
+   
+   5 : |
+   6 : INCL(Parameters, 0) |
+   7 : INCL(Parameters, 1) |
+   8 : INCL(Parameters, 0) ;
+       INCL(Parameters, 1)
+
+   ELSE
+      RETURN( FALSE )
+   END ;
+   Out8(LineContrReg, VAL(BYTE, Parameters)) ;
+   RETURN( TRUE )
+END Init ;
+
+
+(*
+   DetermineUART - returns the type of UART.
+                   Translated from the Serial FAQ document on the Internet.
+*)
+
+PROCEDURE DetermineUART () : TypeOfUART ;
+VAR
+   BitSet: BITSET ;
+BEGIN
+   (* first step: see if the LCR is there *)
+   Out8(LineContrReg, 01BH) ;
+   IF In8(LineContrReg)#BYTE(01BH)
+   THEN
+      RETURN( UartUnknown )
+   ELSE
+      Out8(LineContrReg, BYTE(03H)) ;
+      IF In8(LineContrReg)#BYTE(03H)
+      THEN
+         RETURN( UartUnknown )
+      ELSE
+         (* next thing to do is look for the scratch register *)
+         Out8(ScratchReg, 055H) ;
+         IF In8(ScratchReg)#BYTE(055H)
+         THEN
+            RETURN( Uart8250 )
+         ELSE
+            Out8(ScratchReg, 0AAH) ;
+            IF In8(ScratchReg)#BYTE(0AAH)
+            THEN
+               RETURN( Uart8250 )
+            ELSE
+               (* then check if there is a FIFO *)
+               Out8(FifoControlReg, 1);
+               BitSet := VAL(BITSET, In8(IntIdentReg)) ;
+               IF NOT (7 IN BitSet)
+               THEN
+                  RETURN( Uart16450 )
+               ELSIF NOT (6 IN BitSet)
+               THEN
+                  RETURN( Uart16550 )
+               END
+            END
+         END
+      END
+   END ;
+   (* some old-fashioned software relies on this! *)
+   Out8(IntIdentReg, 0) ;
+   RETURN( Uart16550A )
+END DetermineUART ;
+
+
+(*
+   SetUpCommPort - clears the UART registers ready for initialization.
+*)
+
+PROCEDURE SetUpCommPort ;
+VAR
+   BitSet: BITSET ;
+BEGIN
+   ThisUart := DetermineUART() ;
+   MonStrIO.WriteString('UART type is ') ;
+   CASE ThisUart OF
+
+   UartUnknown:  MonStrIO.WriteString('unknown') |
+   Uart8250   :  MonStrIO.WriteString('8250   ') |
+   Uart16450  :  MonStrIO.WriteString('16450  ') |
+   Uart16550  :  MonStrIO.WriteString('16550  ') |
+   Uart16550A :  MonStrIO.WriteString('16550A ')
+
+   ELSE
+      MonStrIO.WriteString('<detection routine failed>')
+   END ;
+(*
+   (* Disable Interrupts *)
+   DLAB(0) ;
+   Out8(LineContrReg, 0H) ;
+   Out8(IntEnableReg, 0H) ;
+
+   (* clear the controller: *)
+   BitSet := VAL(BITSET, In8(LineStatusReg)) ;
+   IF DataReadyBit IN BitSet
+   THEN
+      (* data ready *)
+      ch := In8(ReceiverReg)
+   END ;
+
+   IF TxHoldingRegEmptyBit IN BitSet
+   THEN
+      Out8(TransmitReg, ch)
+   END ;
+
+   (* We can set the line status to {} see page 1-213 of the IBM-PC *)
+   (* technical manual.                                             *)
+   Out8(LineStatusReg, 00H) ;   (* Controller cleared *)
+*)
+
+   (* Select the type of interrupts we require. *)
+
+   BitSet := {} ;
+   BitSet := VAL(BITSET, In8(ModemContrReg)) ;
+   INCL(BitSet, 3) ;      (* bit 3 must be set, otherwise no  *)
+                          (* interrupts will be generated;    *)
+                          (* see technical reference of       *)
+                          (* IBM-PC, page 1-200               *)
+(*
+   INCL(BitSet, 0) ;      (* set DTR                          *)
+   INCL(BitSet, 1) ;      (* set RTS - always keep active     *)
+*)
+   Out8(ModemContrReg, VAL(BYTE, BitSet)) ;
+
+   (* Enable interrupts in the communications controller (8250):  *)
+   (*        Allow receiver interrupts and transmitter interrupts *)
+   (*        and Modem status interrupts. Specifically CTS.       *)
+
+   IF ThisUart=Uart16550A
+   THEN
+      Out8(IntEnableReg, {EnableDataAvailableInt,
+                          EnableTxHoldingRegEmptyInt}) ;
+      (* enable fifo: clear fifo set trigger at 14 bytes *)
+      Out8(FifoControlReg, 0C7H)
+   ELSE
+      (* only TX xor RX for these chips *)
+      Out8(IntEnableReg, {EnableDataAvailableInt})
+   END
+END SetUpCommPort ;
+
+
+(*
+   N.B - The RS232 cable is wired up as:
+
+
+   MC1                           MC2
+
+
+   TX   <--------------------->   RC
+
+   RC   <--------------------->   TX
+                                 
+   CTS  <--------------------->  DTR
+
+   DTR  <--------------------->  CTS
+
+   GND  <--------------------->  GND
+
+   RTS  <--------------------->  DSR
+
+   DSR  <--------------------->  RTS
+*)
+
+PROCEDURE SerioDriver ;
+VAR
+   OldState: OnOrOff ;
+BEGIN
+   OldState := TurnInterrupts(Off) ;
+   ReadCtrlChar := dc1 ;      (* current state is Xon *)
+   DisableTxInts ;            (* enable rx interrupts *)
+   CurrentIIR := 0 ;          (* force Flush to write *)
+   FlushShadowInterruptRegister ;
+   LOOP
+      IF Debugging
+      THEN
+         Scn.Write('W')
+      END ;
+      WaitForIO(IrqBase+IrqNo) ;
+      IF Debugging
+      THEN
+         Scn.Write('I')
+      END ;
+      (*
+         ok an interrupt has occurred
+      *)
+      ServiceLineStatusReg
+   END
+END SerioDriver ;
+
+
+(*
+   FlushShadowInterruptRegister - only writes the shadow interrupt register if it
+                                  differs with the current interrupt register.
+*)
+
+PROCEDURE FlushShadowInterruptRegister ;
+BEGIN
+   IF ShadowIIR#CurrentIIR
+   THEN
+      CurrentIIR := ShadowIIR ;
+      IF Debugging
+      THEN
+         MonStrIO.WriteString('[IER=') ; MonStrIO.WriteCard(VAL(CARDINAL, CurrentIIR), 1) ; MonStrIO.WriteString(']')
+      END ;
+(*
+      IER := VAL(BITSET, In8(IntEnableReg)) ;
+      IF EnableDataAvailableInt IN VAL(BITSET, CurrentIIR)
+      THEN
+         INCL(IER, EnableDataAvailableInt)
+      ELSE
+         EXCL(IER, EnableDataAvailableInt)
+      END ;
+      IF EnableTxHoldingRegEmptyInt IN VAL(BITSET, CurrentIIR)
+      THEN
+         INCL(IER, EnableTxHoldingRegEmptyInt)
+      ELSE
+         EXCL(IER, EnableTxHoldingRegEmptyInt)
+      END ;
+      Out8(IntEnableReg, VAL(BYTE, IER))
+*)
+      Out8(IntEnableReg, CurrentIIR)
+   END
+END FlushShadowInterruptRegister ;
+
+
+(*
+   EnableTxInts - set the transmit interrupt bit in the shadow IIR.
+*)
+
+PROCEDURE EnableTxInts ;
+BEGIN
+   IF ThisUart=Uart16550A
+   THEN
+      ShadowIIR := VAL(BYTE,
+                       {EnableDataAvailableInt,
+                       EnableTxHoldingRegEmptyInt}) ;
+   ELSE
+      (*
+         bug in 8250 & 16450 which will loose interrupts if both
+         tx & rx ints are enabled at the same time.
+      *)
+      ShadowIIR := VAL(BYTE, {EnableTxHoldingRegEmptyInt}) ;
+   END ;
+   IF Debugging
+   THEN
+      Scn.Write('{') ;
+      Scn.Write('e') ;
+      Scn.Write('}') ;
+   END
+END EnableTxInts ;
+
+
+(*
+   DisableTxInts - unsets the transmit interrupt bit in the shadow IIR.
+*)
+
+PROCEDURE DisableTxInts ;
+BEGIN
+   ShadowIIR := VAL(BYTE, {EnableDataAvailableInt})
+END DisableTxInts ;
+
+
+(*
+   CheckControl - 
+*)
+
+PROCEDURE CheckControl (CopyOfLineStatusReg: BITSET) ;
+BEGIN
+   IF OverrunErrorBit IN CopyOfLineStatusReg
+   THEN
+      MonStrIO.WriteString('<overrun>')
+   END ;
+   IF ParityErrorBit IN CopyOfLineStatusReg
+   THEN
+      MonStrIO.WriteString('<parity>')
+   END ;
+   IF FramingErrorBit IN CopyOfLineStatusReg
+   THEN
+      MonStrIO.WriteString('<framing>')
+   END ;
+   IF BreakIndicatorBit IN CopyOfLineStatusReg
+   THEN
+      MonStrIO.WriteString('<break>')
+   END
+END CheckControl ;
+
+
+(*
+   DoReceive - checks the data ready bit and if set grabs the next available
+               character.
+*)
+
+PROCEDURE DoReceive (CopyOfLineStatusReg: BITSET) ;
+BEGIN
+   IF DataReadyBit IN CopyOfLineStatusReg
+   THEN
+      ConsumeRxData
+   END
+END DoReceive ;
+
+
+(*
+   DoTransmit - checks the line status register to see whether
+                a character can be written.
+*)
+
+PROCEDURE DoTransmit (CopyOfLineStatusReg: BITSET) ;
+BEGIN
+   IF TxHoldingRegEmptyBit IN CopyOfLineStatusReg
+   THEN
+      IF IsEmptyWriteBuf()
+      THEN
+         IF Debugging
+         THEN
+            Scn.Write('{') ;
+            Scn.Write('d') ;
+            Scn.Write('}')
+         END ;
+         DisableTxInts ;
+         FlushShadowInterruptRegister
+      ELSIF UseXonXoff AND (ReadCtrlChar=dc3)
+      THEN
+         DisableTxInts ;
+         FlushShadowInterruptRegister ;
+         IF Debugging
+         THEN
+            Scn.Write('{') ;
+            Scn.Write('d') ;
+            Scn.Write('x') ;
+            Scn.Write('}')
+         END
+      ELSIF SendCtrl
+      THEN
+         EnableTxInts ;
+         FlushShadowInterruptRegister ;
+         SendFlowControl ;
+         SendCtrl := FALSE
+      ELSE
+         EnableTxInts ;
+         FlushShadowInterruptRegister ;
+         IF Debugging
+         THEN
+            Scn.Write('#')
+         END ;
+(*
+         REPEAT
+         UNTIL TxShiftRegEmptyBit IN VAL(BITSET, In8(LineStatusReg)) ;
+*)
+         Out8(TransmitReg, ReadFromWriteBuf())
+      END
+   END
+END DoTransmit ;
+
+
+(*
+   ServiceLineStatusReg - examines the LineStatusReg and takes appropriate
+                          action.
+*)
+
+PROCEDURE ServiceLineStatusReg ;
+VAR
+   CopyOfModemStatusReg,
+   CopyOfIIR,
+   CopyOfLineStatusReg : BITSET ;
+BEGIN
+   (* ok now read data *)
+   CopyOfIIR := VAL(BITSET, In8(IntIdentReg)) * {0, 1, 2, 3} ;
+   IF CopyOfIIR=ModemInterrupt
+   THEN
+      CopyOfModemStatusReg := VAL(BITSET, In8(ModemStatusReg))
+   ELSIF CopyOfIIR=NoInterrupt
+   THEN
+   END ;
+   IF CopyOfIIR * CharacterErrorInterrupt=CharacterErrorInterrupt
+   THEN
+      CheckControl(VAL(BITSET, In8(LineStatusReg)))
+   END ;
+   IF CopyOfIIR * TransmitInterrupt=TransmitInterrupt
+   THEN
+      (* serviced by reading IIR, done above *) 
+   END ;
+   IF (CopyOfIIR * DataFifoInterrupt=DataFifoInterrupt) OR
+      (CopyOfIIR * DataReadyInterrupt=DataReadyInterrupt)
+   THEN
+      DoReceive(VAL(BITSET, In8(LineStatusReg)))
+   END ;
+   (* always check for outgoing characters *)
+   DoTransmit(VAL(BITSET, In8(LineStatusReg)))
+END ServiceLineStatusReg ;
+
+
+(*
+   SendFlowControl - send the appropriate flow control character.
+*)
+
+PROCEDURE SendFlowControl ;
+BEGIN
+   (* flow control character needs to be sent *)
+   IF Debugging
+   THEN
+      IF WriteCtrlChar=dc3
+      THEN
+         Scn.Write('{') ;
+         Scn.Write('x') ;
+         Scn.Write('o') ;
+         Scn.Write('f') ;
+         Scn.Write('f') ;
+         Scn.Write('}')
+      ELSE
+         Scn.Write('{') ;
+         Scn.Write('x') ;
+         Scn.Write('o') ;
+         Scn.Write('n') ;
+         Scn.Write('}')
+      END
+   END ;
+   Out8(TransmitReg, WriteCtrlChar)
+END SendFlowControl ;
+
+
+(*
+   ConsumeRxData - consumes a character from the receiver buffer.
+                   This should only be called if DataReadyBit is
+                   set in the control line register.
+*)
+
+PROCEDURE ConsumeRxData ;
+BEGIN
+   RCch := In8(ReceiverReg) ;
+   IF UseXonXoff
+   THEN
+      IF (RCch=dc3) AND (ReadCtrlChar=dc1)
+      THEN
+         IF Debugging
+         THEN
+            Scn.Write('[') ;
+            Scn.Write('x') ;
+            Scn.Write('o') ;
+            Scn.Write('f') ;
+            Scn.Write('f') ;
+            Scn.Write(']')
+         END ;
+         ReadCtrlChar := RCch
+      ELSIF (RCch=dc1) AND (ReadCtrlChar=dc3)
+      THEN
+         IF Debugging
+         THEN
+            Scn.Write('[') ;
+            Scn.Write('x') ;
+            Scn.Write('o') ;
+            Scn.Write('n') ;
+            Scn.Write(']')
+         END ;
+         ReadCtrlChar := RCch
+      END
+   END ;
+   IF (RCch#dc1) AND (RCch#dc3)
+   THEN
+      IF Debugging
+      THEN
+         Scn.Write('[') ;
+         Scn.Write(RCch) ;
+         Scn.Write(']')
+      END ;
+      WriteToReadBuf(RCch)
+   END
+END ConsumeRxData ;
+
+
+(*
+   WriteToReadBuf - places a character into the read buffer providing that
+                    space exists.
+*)
+
+PROCEDURE WriteToReadBuf (ch: CHAR) ;
+BEGIN
+   WITH ReadBuf DO
+      IF SpaceAvailableCard>0
+      THEN
+         buf[in] := ch ;
+         in := (in+1) MOD MaxBuffer ;
+         DEC(SpaceAvailableCard) ;
+         Signal(ItemAvailableSem)
+      END ;
+      IF UseXonXoff AND (SpaceAvailableCard<WriteThreshold)
+      THEN
+         IF Debugging
+         THEN
+            Scn.Write('x') ;
+            Scn.Write('o') ;
+            Scn.Write('f') ;
+            Scn.Write('f')
+         END ;
+         SendCtrl := TRUE ;
+         WriteCtrlChar := dc3 ;  (* Xoff *)
+      END
+   END
+END WriteToReadBuf ;
+
+
+(*
+   ReadFromReadBuf - waits until a character is available.
+*)
+
+PROCEDURE ReadFromReadBuf (VAR ch: CHAR) ;
+VAR
+   ToOldState: OnOrOff ;
+BEGIN
+   ToOldState := TurnInterrupts(Off) ;
+   WITH ReadBuf DO
+      Wait(ItemAvailableSem) ;
+      INC(SpaceAvailableCard) ;
+      ch := buf[out] ;
+      out := (out+1) MOD MaxBuffer ;
+      IF UseXonXoff AND
+         (SpaceAvailableCard=ReadThreshold) AND (WriteCtrlChar=dc3)
+      THEN
+         SendCtrl := TRUE ;
+         WriteCtrlChar := dc1 ;  (* Xon *)
+         IF Debugging
+         THEN
+            Scn.Write('{') ;
+            Scn.Write('x') ;
+            Scn.Write('o') ;
+            Scn.Write('n') ;
+            Scn.Write('}')
+         END
+      END
+   END ;
+   ToOldState := TurnInterrupts(ToOldState)
+END ReadFromReadBuf ;
+
+
+(*
+   WriteToWriteBuf - places a character into the write buffer providing that
+                     space exists.
+*)
+
+PROCEDURE WriteToWriteBuf (ch: CHAR) ;
+BEGIN
+   WITH WriteBuf DO
+      Wait(SpaceAvailableSem) ;
+      INC(ItemAvailableCard) ;
+      buf[in] := ch ;
+      in := (in+1) MOD MaxBuffer
+   END
+END WriteToWriteBuf ;
+
+
+(*
+   ReadFromWriteBuf - waits until a character is available.
+*)
+
+PROCEDURE ReadFromWriteBuf () : CHAR ;
+VAR
+   ToOldState: OnOrOff ;
+   ch        : CHAR ;
+BEGIN
+   ToOldState := TurnInterrupts(Off) ;
+   WITH WriteBuf DO
+      IF ItemAvailableCard>0
+      THEN
+         ch := buf[out] ;
+         out := (out+1) MOD MaxBuffer ;
+         DEC(ItemAvailableCard) ;
+         Signal(SpaceAvailableSem)
+      ELSE
+         MonStrIO.WriteString('no characters available in buffer - error in SerIOA\n') ;
+         ch := 0C
+      END
+   END ;
+   ToOldState := TurnInterrupts(ToOldState) ;
+   RETURN( ch )
+END ReadFromWriteBuf ;
+
+
+(*
+   IsEmptyWriteBuf - returns TRUE if the write buffer is empty.
+*)
+
+PROCEDURE IsEmptyWriteBuf () : BOOLEAN ;
+BEGIN
+   RETURN( WriteBuf.ItemAvailableCard=0 )
+END IsEmptyWriteBuf ;
+
+
+(*
+   InitBuf - initialize the buffer data structures.
+*)
+
+PROCEDURE InitBuf ;
+BEGIN
+   WITH ReadBuf DO
+      SpaceAvailableCard := MaxBuffer ;
+      in := 0 ;
+      out := 0 ;
+      ItemAvailableSem := InitSemaphore(0, 'ser item')
+   END ;
+   WITH WriteBuf DO
+      ItemAvailableCard := 0 ;
+      in := 0 ;
+      out := 0 ;
+      SpaceAvailableSem := InitSemaphore(MaxBuffer, 'ser space')
+   END ;
+   (* now the flow control variables *)
+   WriteCtrlChar := dc1 ; (* Currently in Xon state *)
+   SendCtrl := TRUE ;
+   InitProcess( SerioProcess, SerioDriver, 7, 0, StackSpace, 0, System,
+                NIL, 'SerAIO' )
+END InitBuf ;
+
+
+CONST
+   MaxBuffer     = 50 ;
+   ReadThreshold = 15 ;
+   WriteThreshold= 10 ;
+
+
+TYPE
+   (*
+      These buffers are not the conventional dijkstra bounded buffers,
+      but a simplified buffer record which can be used providing processor
+      interrupts are off.
+   *)
+   FastWriteBuffer = RECORD
+                        buf              : ARRAY [0..MaxBuffer] OF CHAR ;
+                        ItemAvailableCard: CARDINAL ;
+                        SpaceAvailableSem: SEMAPHORE ;
+                        in, out          : CARDINAL ;
+                     END ;
+
+   FastReadBuffer  = RECORD
+                        buf               : ARRAY [0..MaxBuffer] OF CHAR ;
+                        SpaceAvailableCard: CARDINAL ;
+                        ItemAvailableSem  : SEMAPHORE ;
+                        in, out           : CARDINAL ;
+                     END ;
+
+VAR
+   WriteCtrlChar: CHAR ;
+   ReadCtrlChar : CHAR ;
+   SendCtrl     : BOOLEAN ;         (* must we send xon or xoff ? *)
+   SerioProcess : PtrToProcDes ;    (* Serio device driver *)
+   ReadBuf      : FastReadBuffer ;
+   WriteBuf     : FastWriteBuffer ;
+
+
+(*
+   Read - exported user procedure which waits until a
+          character is ready in the buffer.
+*)
+
+PROCEDURE Read (VAR ch: CHAR) ;
+VAR
+   ToOldState: OnOrOff ;
+BEGIN
+   ToOldState := TurnInterrupts(Off) ;
+   ReadFromReadBuf(ch) ;
+   ToOldState := TurnInterrupts(ToOldState)
+END Read ;
+
+
+(* Write is the exported user procedure which waits until a   *)
+(* character is ready in the buffer.                          *)
+
+PROCEDURE Write (ch: CHAR) ;
+VAR
+   ToOldState         : OnOrOff ;
+   CopyOfLineStatusReg: BITSET ;
+BEGIN
+   ToOldState := TurnInterrupts(Off) ;
+   IF UseXonXoff AND (ReadCtrlChar=dc3)
+   THEN
+      IF Debugging
+      THEN
+         Scn.Write('x')
+      END ;
+      (*
+         other host has told us to stop sending characters.
+         We are in the xoff state - therefore store char but leave
+         interrupt enable register alone.
+      *)
+      WriteToWriteBuf(ch)
+   ELSE
+      EnableTxInts ;
+      FlushShadowInterruptRegister ;   (* if we have changed state flush *)
+      CopyOfLineStatusReg := VAL(BITSET, In8(LineStatusReg)) ;
+      (* Firstly lets check to see whether a character has arrived *)
+
+      IF DataReadyBit IN CopyOfLineStatusReg
+      THEN
+         (*
+            We check to see whether data has arrived because we
+            only enable the RX xor TX interrupts. Hence both the
+            Driver process and this Write procedure deal with
+            both RX and TX cases. We don't NEED to do this but it
+            stops us dropping a few incomming characters which
+            otherwise will occur.
+         *)
+         ConsumeRxData
+      END ;
+
+      IF (* (TxShiftRegEmptyBit IN CopyOfLineStatusReg) AND *)
+         (TxHoldingRegEmptyBit IN CopyOfLineStatusReg)
+      THEN
+         (* ready and waiting to send one character *)
+         IF SendCtrl
+         THEN
+            IF Debugging
+            THEN
+               Scn.Write('c') ;
+               Scn.Write('t') ;
+               Scn.Write('r') ;
+               Scn.Write('l')
+            END ;
+            (*
+               Control character needs to be sent.
+               It has a higher precidence than
+               ch, otherwise we may never get around to sending ctrl char.
+            *)
+            SendFlowControl ;
+            SendCtrl := FALSE ;
+            WriteToWriteBuf(ch)
+         ELSIF IsEmptyWriteBuf()
+         THEN
+            IF Debugging
+            THEN
+               Scn.Write('q')
+            END ;
+            (* no characters in buffer and UART TX is empty *)
+
+            DisableTxInts ;
+            FlushShadowInterruptRegister ;   (* if we have changed state flush *)
+            Out8(TransmitReg, ch) ;
+         ELSE
+            IF Debugging
+            THEN
+               Scn.Write('b')
+            END ;
+            (*
+               buffer not empty therefore we must retain fifo order.
+               However UART is still idle - lets get a character from our buffer and kick
+               the UART off again.
+            *)
+            Out8(TransmitReg, ReadFromWriteBuf()) ;
+            WriteToWriteBuf(ch)
+         END
+      ELSE
+         IF Debugging
+         THEN
+            Scn.Write('b') ;
+            Scn.Write('u') ;
+            Scn.Write('s') ;
+            Scn.Write('y')
+         END ;
+         (* UART busy - we store the character in the buffer *)
+         WriteToWriteBuf(ch)
+      END
+   END ;
+   ToOldState := TurnInterrupts(ToOldState)
+END Write ;
+
+
+(*
+   GetComm - returns the serial port number 1, 2.
+*)
+
+PROCEDURE GetComm () : CARDINAL ;
+BEGIN
+   IF Com1=1
+   THEN
+      RETURN( 1 )
+   ELSE
+      RETURN( 2 )
+   END
+END GetComm ;
+
+
+PROCEDURE Initialize ;
+BEGIN
+   IF GetDebugging()#GetComm()
+   THEN
+      IrqNo := GetIrqNo(IOBase) ;
+      MonStrIO.WriteString('Serial device at ') ; MonStrIO.WriteHex(IOBase, 4) ;
+      MonStrIO.WriteString('  irq no') ; MonStrIO.WriteCard(IrqNo, 4) ;
+      IF IrqNo=256
+      THEN
+         MonStrIO.WriteString(' does not exist\n')
+      ELSE
+         InitBuf ;
+         SetUpCommPort ;
+         IF Init(38400, 1, 8, None, FALSE)
+         THEN
+            MonStrIO.WriteString(' initialized\n') ;
+            Resume(SerioProcess)
+         ELSE
+            MonStrIO.WriteString(' failed\n')
+         END
+      END
+   END
+END Initialize ;
+
+
+BEGIN
+   Initialize
+END SerIOA.
+(*
+ * Local variables:
+ * compile-command: "m2f -M \"../mod ../../boot ../def ../../../comp/libs ../../tools ../svga\" -g -pedantic -verbose -quiet -nomath  -o ../O/SerIOA.o SerIOA"
+ * End:
+ *)

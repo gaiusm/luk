@@ -1,0 +1,31 @@
+@section hello
+
+In this directory is a simple application which just prints ``hello world''
+to the screen and terminates.  It is a minimal application which tests
+whether the microkernel can build and boot correctly.  This example is
+complete and does not require any source code changes.
+
+You need to modify the @file{Makefile.in} and set the @code{APPLICATION}
+variable to @code{hello}.  So the top of @file{Makefile.in} should look
+like this:
+
+@example
+#
+# ================
+# Makefile for luk
+# ================
+#
+# You can configure the microkernel building in the following
+# lines of code
+# 
+# uncomment _one_ of the following APPLICATIONs to build an
+# appropriate microkernel
+#
+#
+APPLICATION=hello
+# APPLICATION=debug
+# APPLICATION=scn
+# APPLICATION=boundedbuffer
+etc etc
+@end example
+

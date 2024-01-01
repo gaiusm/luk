@@ -1,0 +1,38 @@
+DEFINITION MODULE Consoles ;
+
+(*
+   Title      : Consoles
+   Author     : Gaius Mulley
+   Date       : 27/2/88
+   LastEdit   : 27/2/88
+   System     : LOGITECH MODULA-2/86
+   Description: Consoles provides a number of virtual screens.
+*)
+
+EXPORT QUALIFIED SetCurrentConsole,
+                 Read,
+                 Write ;
+
+
+(*
+   SetCurrentConsole - sets the current console to c.
+*)
+
+PROCEDURE SetCurrentConsole (c: CARDINAL) ;
+
+
+(*
+   Write - writes a character, ch, to a console, c.
+*)
+
+PROCEDURE Write (c: CARDINAL; ch: CHAR) ;
+
+
+(*
+   Read - reads a character, ch, from a console, c.
+*)
+
+PROCEDURE Read (c: CARDINAL; VAR ch: CHAR) ;
+
+
+END Consoles.

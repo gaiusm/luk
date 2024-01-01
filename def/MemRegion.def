@@ -1,0 +1,24 @@
+DEFINITION MODULE MemRegion ;
+
+(*
+    Title      : MemRegion
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Thu Aug  7 08:45:29 1997
+    Last edit  : Thu Aug  7 08:45:29 1997
+    Description: provides a simple interface to the linker created
+                 symbols which define the regions of memory.
+*)
+
+FROM SYSTEM IMPORT ADDRESS ;
+EXPORT QUALIFIED EndOfOS ;
+
+
+(*
+   EndOfOS - returns an address which is the first byte after the OS.
+*)
+
+PROCEDURE EndOfOS () : ADDRESS ;
+
+
+END MemRegion.

@@ -1,0 +1,66 @@
+DEFINITION MODULE InstrDB ;
+
+(*
+    Title      : InstructionDB
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Sun May  9 12:17:15 1993
+    Last edit  : Sun May  9 12:17:15 1993
+    Description: Instruction database procedures and data structures.
+*)
+
+FROM NameKey IMPORT Name ;
+
+EXPORT QUALIFIED MaxInstructionBytes, MaxInstructionLength,
+                 PutInstruction, GetInstruction, MakeMatchString,
+                 PutOperand, GetOperand ;
+
+
+CONST
+   MaxInstructionBytes  =  16 ;
+   MaxInstructionLength =  MaxInstructionBytes*8 ;
+
+
+(*
+   PutInstruction - places an instruction in the database.
+*)
+
+PROCEDURE PutInstruction (OpcodeDefinition, NameTemplate: Name) ;
+
+
+(*
+   GetInstruction - attempts to find an instruction using the MatchString.
+                    It returns TRUE if an instruction was found and
+                    fills in OpcodeDefinition and NameTemplate.
+*)
+
+PROCEDURE GetInstruction (MatchString: ARRAY OF CHAR;
+                          VAR OpcodeDefinition,
+                              NameTemplate: Name) : BOOLEAN ;
+
+(*
+   MakeMatchString - creates a matchstring using the OpcodeDefinition.
+*)
+
+PROCEDURE MakeMatchString (OpcodeDefinition: Name) : Name ;
+
+
+(*
+   PutOperand - places an operand in the database.
+*)
+
+PROCEDURE PutOperand (OperandDefinition, NameTemplate: Name) ;
+
+
+(*
+   GetOperand - attempts to find an instruction using the MatchString.
+                It returns TRUE if an instruction was found and
+                fills in OpcodeDefinition and NameTemplate.
+*)
+
+PROCEDURE GetOperand (MatchString: ARRAY OF CHAR;
+                      VAR OperandDefinition,
+                          NameTemplate: Name) : BOOLEAN ;
+
+
+END InstrDB.

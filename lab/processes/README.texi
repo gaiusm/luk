@@ -1,0 +1,6 @@
+@section processes
+
+In this directory is an application which runs three processes running
+in separate windows.  It is a test application which demonstrates that
+the Executive and Interrupts are functioning in the microkernel.  This
+example is complete and does not require any source code modifications.

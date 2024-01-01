@@ -1,0 +1,59 @@
+DEFINITION MODULE IRQ ;
+
+(*
+    Title      : IRQ
+    Author     : Gaius Mulley
+    System     : RTS (gm2)
+    Date       : Tue Aug  9 12:11:54 1994
+    Last edit  : Tue Aug  9 12:11:54 1994
+    Description: provides a simple interface to the IRQ hardware.
+*)
+
+EXPORT QUALIFIED ProcIRQ, InitIRQ, KillIRQ, EnableIRQ, DisableIRQ, Init ;
+
+
+CONST
+   MaxIRQ = 15 ;
+
+TYPE
+   ProcIRQ = PROCEDURE (CARDINAL) ;
+
+
+(*
+   InitIRQ - initialises irq, IrqNo, to call PROCEDURE, p,
+             when this interrupt occurs.
+*)
+
+PROCEDURE InitIRQ (IrqNo: CARDINAL; p: ProcIRQ) ;
+
+
+(*
+   KillIRQ - removes an IRQ handler.
+*)
+
+PROCEDURE KillIRQ (IrqNo: CARDINAL) ;
+
+
+(*
+   EnableIRQ - enable irq, IrqNo.
+*)
+
+PROCEDURE EnableIRQ (IrqNo: CARDINAL) ;
+
+
+(*
+   DisableIRQ - disable irq, IrqNo.
+*)
+
+PROCEDURE DisableIRQ (IrqNo: CARDINAL) ;
+
+
+(*
+   Init - initializes the module data structures and assigns default
+          irq handlers.
+*)
+
+PROCEDURE Init ;
+
+
+END IRQ.

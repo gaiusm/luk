@@ -1,0 +1,24 @@
+DEFINITION MODULE Redirect ;
+
+(*
+   Title      : Redirect
+   Author     : Gaius Mulley
+   Date       : 14/8/89
+   LastEdit   : 14/8/89
+   System     : LOGITECH MODULA-2/86
+   Description: Allows the caller to redirect a processes input/output.
+*)
+
+EXPORT QUALIFIED DoRedirect ;
+
+
+(*
+   DoRedirect - interprets the options after the command redirect and
+                performs the required function.
+                Usage: redirect processname < stdin > stdout
+*)
+
+PROCEDURE DoRedirect ;
+
+
+END Redirect.

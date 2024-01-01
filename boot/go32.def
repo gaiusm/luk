@@ -1,0 +1,32 @@
+DEFINITION MODULE go32 ;
+
+(*
+    Title      : go32
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Tue Jul 26 16:33:11 1994
+    Last edit  : Tue Jul 26 16:33:11 1994
+    Description: Provides a routine which jumps to
+                 location 0 of the new code segment
+                 in protected mode. It sets up the
+                 minimum descriptor tables to allow
+                 a flat 32 bit programming model.
+*)
+
+EXPORT QUALIFIED CallOS, getgdt, getChecksum, getds ;
+
+
+PROCEDURE getgdt () : CARDINAL ;
+PROCEDURE getChecksum () : CARDINAL ;
+PROCEDURE getds () : CARDINAL ;
+
+
+(*
+   CallOS - one way call which goes protected and jumps to
+            location 0 of the new code segment.
+*)
+
+PROCEDURE CallOS ;
+
+
+END go32.

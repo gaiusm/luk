@@ -1,0 +1,22 @@
+DEFINITION MODULE SLoad ;
+
+(*
+    Title      : SLoad
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Mon Aug  7 11:02:59 1995
+    Last edit  : Mon Aug  7 11:02:59 1995
+    Description: provides a simple serial downloading facility.
+*)
+
+EXPORT QUALIFIED LoadProgram ;
+
+
+(*
+   LoadProgram - loads in a new realtime system and runs it.
+*)
+
+PROCEDURE LoadProgram ;
+
+
+END SLoad.

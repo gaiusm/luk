@@ -1,0 +1,51 @@
+include ../../compiler.options
+
+SHELL        =/bin/sh
+DEBUGFLAGS   = DEBUG
+# DEBUGFLAGS = NODEBUG
+BINDIR       = ../../bin
+COMPILER     = ../../../comp
+AS           = as86
+LD           = ld86
+M28088OPTIONS= -O
+M28088       = m2f -bas -16 -M "../ . $(COMPILER)/libs" $(M28088OPTIONS)
+
+boot.o: boot.S
+	$(AS) -0 -a -l boot.lst boot.S -o boot.o 
+
+boot: boot.o Util.o
+	$(LD) -0 -s boot.o Util.o -o ../boot
+
+Util.o: Util.S
+	$(AS) -0 -a -l Util.lst Util.S -o Util.o 
+
+brt0.o: brt0.S
+	$(AS) -0 -a -l brt0.lst brt0.S -o brt0.o
+
+go32.o: go32.S
+	$(AS) -0 -a -l go32.lst go32.S -o go32.o
+
+second: brt0.o Util.o second.o M2RTS.o go32.o
+	$(LD) -i -0 -s -o ../second brt0.o second.o Util.o M2RTS.o go32.o
+
+second.o: ../second.mod
+	$(M28088) second
+
+M2RTS.o: ../M2RTS.mod
+	$(M28088) M2RTS
+
+os: force
+	( cd ../m2mus ; make )
+
+bootdisk: force
+	( cd .. ; make bootdisk )
+
+image: force
+	( cd .. ; make image )
+
+clean: force
+	rm -f *.o bad try a.out b.out *~ *.lst #*
+	rm -f second os boot image *.s
+
+force:
+

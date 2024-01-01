@@ -1,0 +1,84 @@
+DEFINITION MODULE IO ;
+
+(*
+      Author     : Gaius Mulley
+      Title      : IO
+      Version    : 1.0
+      Date       : 12/2/86
+      Last Edit  : 12/2/86
+      Description: Provides a mechanism whereby all processes can use the
+                   same input/output libraries but communicate to different
+                   devices.
+*)
+
+FROM SYSTEM IMPORT ADDRESS ;
+FROM StdIO IMPORT ProcWrite, ProcRead ;
+
+EXPORT QUALIFIED NewStream, DisposeStream, ConnectStream, DisConnectStream,
+                 SwapStream, InitStream, DupStream,
+                 STREAM ;
+
+TYPE
+   STREAM = POINTER TO Stream ;
+   Stream = RECORD
+               inchar : ProcRead ;
+               outchar: ProcWrite ;
+               errchar: ProcWrite ;
+               devin  : ADDRESS ;
+               devout : ADDRESS ;
+               deverr : ADDRESS ;
+            END ;
+
+
+(*
+   NewStream - creates a new stream, s.
+*)
+
+PROCEDURE NewStream (VAR s: STREAM) ;
+
+(*
+   DisposeStream - disposes of an unused stream, s.
+*)
+
+PROCEDURE DisposeStream (VAR s: STREAM) ;
+
+(*
+   ConnectStream - sets stream s1 to stream s2.
+*)
+
+PROCEDURE ConnectStream (VAR s1: STREAM ; s2: STREAM) ;
+
+(*
+   DisConnectStream - sets stream s2 to stream s1.
+*)
+
+PROCEDURE DisConnectStream (s1: STREAM ; VAR s2: STREAM) ;
+
+(*
+   Swaps the streams s1 and s2.
+*)
+
+PROCEDURE SwapStream (VAR s1, s2: STREAM) ;
+
+
+(*
+   DupStream - duplicates the stream, s1, a copy is made in s2.
+*)
+
+PROCEDURE DupStream (s1: STREAM; s2: STREAM) ;
+
+
+(*
+   InitStream - initialises a stream, s, to contain a read procedure
+                r, a write procedure, w, and an error procedure e.
+                The Addresses ra, wa, ea, at the moment have little
+                significance - one day they will be used to contain
+                data blocks for block devices.
+*)
+
+PROCEDURE InitStream (s: STREAM ;
+                      r: ProcRead ; ra: ADDRESS ;
+                      w: ProcWrite ; wa: ADDRESS ;
+                      e: ProcWrite ; ea: ADDRESS) ;
+
+END IO.

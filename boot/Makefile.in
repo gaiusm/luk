@@ -1,0 +1,55 @@
+SHELL        =/bin/sh
+
+MACHINE     := $(strip $(shell hostname))
+TARGET       = lancelot
+ifeq (${MACHINE},${TARGET})
+    @echo "since the target is the same as the development - DEBUG is off and DRIVE = /dev/fd0"
+    DRIVE=/dev/fd0
+    DEBUG=
+else
+    DRIVE=/dev/fd1
+endif
+
+BINDIR       = ../bin
+LOAD         = $(BINDIR)/load
+# LOAD         = load
+ASSEMBLER    = BAS
+VERBOSE      =
+
+#image: boot load second os
+#	$(LOAD) -o image -v -Mi+d -0 boot -1 -Mi-d second os
+
+all: load image
+
+image: boot second os
+	$(LOAD) -o image $(VERBOSE) -Mi+d -0 boot -1 -Mi=d second -Mi+d os
+
+vimage: boot second os
+	$(LOAD) -o image -v -Mi+d -0 boot -1 -Mi=d second -Mi+d os
+
+load: force
+	( cd ../tools ; make load )
+
+boot: force
+	( cd $(ASSEMBLER) ; make boot )
+
+second: force
+	( cd $(ASSEMBLER) ; make second )
+
+os: ../m2mus/depend
+	( cd ../m2mus ; make OS)
+
+bootdisk: image
+	dd if=image of=$(DRIVE)
+
+od: force
+	( cd ../tools ; make od )
+
+clean: force
+	rm -f *.o bad try a.out b.out *~ *.lst #*
+	rm -f second os boot image
+	( cd BAS ; make clean )
+	( cd MASM ; make clean )
+
+force:
+

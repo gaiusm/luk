@@ -1,0 +1,29 @@
+DEFINITION MODULE ELF ;
+
+(*
+    Title      : ELF
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Fri Jul 12 11:52:36 1996
+    Last edit  : Fri Jul 12 11:52:36 1996
+    Description: provides a simple interface to decode ELF binaries.
+*)
+
+FROM FIO IMPORT File ;
+
+EXPORT QUALIFIED ExamineELF ;
+
+
+TYPE
+   InitStateProc = PROCEDURE (CARDINAL, CARDINAL, CARDINAL, CARDINAL, CARDINAL) ;
+   ConfirmElf    = PROCEDURE (ARRAY OF CHAR) ;
+
+
+(*
+   ExamineELF - decodes an ELF binary and determine the start, size of text, data and bss.
+*)
+
+PROCEDURE ExamineELF (f: File; c: ConfirmElf; t, d, b: InitStateProc) : BOOLEAN ;
+
+
+END ELF.

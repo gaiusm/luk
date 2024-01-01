@@ -1,0 +1,440 @@
+IMPLEMENTATION MODULE libg ;
+
+(*
+    Title      : libg
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Fri Sep  9 08:12:01 1994
+    Last edit  : Fri Sep  9 08:12:01 1994
+    Description: Contains a very simple polling Write and interrupt driven
+                 Read routine which is used by gdb.
+*)
+
+FROM SYSTEM IMPORT LISTEN, TurnInterrupts, OnOrOff,
+                   BYTE, BITSET ;
+FROM PortIO IMPORT In8, Out8 ;
+FROM DeviceConfiguration IMPORT Parity, GetIrqNo ;
+FROM IRQ IMPORT ProcIRQ, InitIRQ, EnableIRQ ;
+FROM gdb IMPORT breakpoint ;
+FROM M2RTS IMPORT Halt ;
+IMPORT MonStrIO ;
+
+
+CONST
+   ControlC = 03C ;
+
+
+(* Set up constants for the ports that are accessed.          *)
+
+CONST
+   (* the following constant declaration may be modified to change *)
+   (* the module for the alternate communications adapter.         *)
+
+   Com1 = 1 ; (* = 1 means TRUE  or COM1 is used *)
+              (* = 0 means FALSE or COM2 is used *)
+
+   IrqBase= 020H ;   (* irq interrupts live from 020..030 *)
+
+   IOBase = 2F8H + Com1 * 100H;
+
+   LineContrReg    = IOBase+03H; (* to specify format of transmitted data  *)
+   LowBaudRateDiv  = IOBase+00H; (* lower byte of divisor                  *)
+   HighBaudRateDiv = IOBase+01H; (* higher byte of divisor                 *)
+   LineStatusReg   = IOBase+05H; (* holds status info on the data transfer *)
+   ReceiverReg     = IOBase+00H; (* received char is in this register      *)
+   TransmitReg     = IOBase+00H; (* char to send is to put in this reg     *)
+   IntEnableReg    = IOBase+01H; (* to enable the selected interrupt       *)
+   ModemContrReg   = IOBase+04H; (* controls the interface to a modem      *)
+   IntIdentReg     = IOBase+02H; (* Determines what caused interrupt.      *)
+   ModemStatusReg  = IOBase+06H; (* Determines status on the ctrl lines.   *)
+   ScratchReg      = IOBase+07H; (* Only available on some UARTs           *)
+   FifoControlReg  = IOBase+02H; (* Only available on some UARTs           *)
+
+   (* Line Status Registers Bits *)
+
+   DataReadyBit         = 00H ;
+   OverrunErrorBit      = 01H ;
+   ParityErrorBit       = 02H ;
+   FramingErrorBit      = 03H ;
+   BreakIndicatorBit    = 04H ;
+   TxHoldingRegEmptyBit = 05H ;
+   TxShiftRegEmptyBit   = 06H ;
+   FifoErrorBit         = 07H ;
+
+   (* Interrupt Enable Register Bits *)
+
+   EnableDataAvailableInt     = 00H ;
+   EnableTxHoldingRegEmptyInt = 01H ;
+   EnableModemStatusInt       = 03H ;
+
+   (* Interrupt identification register values *)
+   NoInterrupt                = {0} ;
+   CharacterErrorInterrupt    = {1, 2} ;    (* OE, PE, FE, BI    *)
+   DataReadyInterrupt         = {2} ;       (* character waiting *)
+   DataFifoInterrupt          = {2, 3} ;    (* no fifo action?   *)
+   TransmitInterrupt          = {1} ;
+   ModemInterrupt             = {} ;        (* must read msr     *)
+
+TYPE
+   TypeOfUART = (UartUnknown, Uart8250, Uart16450, Uart16550, Uart16550A) ;
+
+VAR
+   IrqNo   : CARDINAL ;
+   ThisUart: TypeOfUART ;
+
+
+PROCEDURE DLAB (Bit: CARDINAL) ;
+VAR
+   Status : BITSET ;
+   Byte   : CHAR ;
+BEGIN
+   Byte := In8( LineContrReg ) ;
+   Status := VAL(BITSET, Byte) ;
+   IF Bit=1
+   THEN
+      INCL(Status, 7)
+   ELSE
+      EXCL(Status, 7)
+   END ;
+   Out8(LineContrReg, VAL(BYTE, Status))
+END DLAB ;
+
+
+(*
+   InitDevice - Initializes the serial port to specific values.
+                The legal values for the parameters are:
+                    BaudRate  : 300..9600
+                    StopBits  : 1..2
+                    WordLength: 5..8
+*)
+
+PROCEDURE InitDevice (BaudRate, StopBits, WordLength: CARDINAL; p: Parity) : BOOLEAN ;
+VAR
+   DivisorLow,
+   DivisorHigh: BYTE ;
+   Parameters : BITSET ;
+BEGIN
+   CASE BaudRate OF
+
+   300   : DivisorLow := 80H ;
+           DivisorHigh := 1H |
+
+   600   : DivisorLow := 0C0H ;
+           DivisorHigh := 0H |
+
+   1200  : DivisorLow := 60H ;
+           DivisorHigh := 0H |
+
+   2400  : DivisorLow := 30H ;
+           DivisorHigh := 0H |
+
+   4800  : DivisorLow := 18H ;
+           DivisorHigh := 0H |
+
+   9600  : DivisorLow := 0CH ;
+           DivisorHigh := 0H |
+
+   19200 : DivisorLow := 06H ;
+           DivisorHigh := 0H |
+
+   38400 : DivisorLow := 03H ;
+           DivisorHigh := 0H
+
+   ELSE
+      RETURN( FALSE )
+   END ;
+
+   (* load the Divisor of the baud rate generator: *)
+   DLAB(1) ;
+   Out8(HighBaudRateDiv, DivisorHigh) ;
+   Out8(LowBaudRateDiv, DivisorLow) ;
+   DLAB(0) ;
+
+   (* prepare the Parameters: *)
+   Parameters := {};
+   IF StopBits=2
+   THEN
+      INCL(Parameters, 2) ;
+   ELSIF StopBits#1
+   THEN
+      RETURN( FALSE )
+   END ;
+   IF (p=Odd) OR (p=Even)
+   THEN
+      INCL(Parameters, 3) ;
+      IF p=Even
+      THEN
+         INCL(Parameters, 4)
+      END
+   END ;
+   CASE WordLength OF
+
+   5 : |
+   6 : INCL(Parameters, 0) |
+   7 : INCL(Parameters, 1) |
+   8 : INCL(Parameters, 0) ;
+       INCL(Parameters, 1)
+
+   ELSE
+      RETURN( FALSE )
+   END ;
+   Out8(LineContrReg, VAL(BYTE, Parameters)) ;
+   RETURN( TRUE )
+END InitDevice ;
+
+
+(*
+   DetermineUART - returns the type of UART.
+                   Translated from the Serial FAQ document on the Internet.
+*)
+
+PROCEDURE DetermineUART () : TypeOfUART ;
+VAR
+   BitSet: BITSET ;
+BEGIN
+   (* first step: see if the LCR is there *)
+   Out8(LineContrReg, 01BH) ;
+   IF In8(LineContrReg)#BYTE(01BH)
+   THEN
+      RETURN( UartUnknown )
+   ELSE
+      Out8(LineContrReg, BYTE(03H)) ;
+      IF In8(LineContrReg)#BYTE(03H)
+      THEN
+         RETURN( UartUnknown )
+      ELSE
+         (* next thing to do is look for the scratch register *)
+         Out8(ScratchReg, 055H) ;
+         IF In8(ScratchReg)#BYTE(055H)
+         THEN
+            RETURN( Uart8250 )
+         ELSE
+            Out8(ScratchReg, 0AAH) ;
+            IF In8(ScratchReg)#BYTE(0AAH)
+            THEN
+               RETURN( Uart8250 )
+            ELSE
+               (* then check if there is a FIFO *)
+               Out8(FifoControlReg, 1);
+               BitSet := VAL(BITSET, In8(IntIdentReg)) ;
+               IF NOT (7 IN BitSet)
+               THEN
+                  RETURN( Uart16450 )
+               ELSIF NOT (6 IN BitSet)
+               THEN
+                  RETURN( Uart16550 )
+               END
+            END
+         END
+      END
+   END ;
+   (* some old-fashioned software relies on this! *)
+   Out8(IntIdentReg, 0) ;
+   RETURN( Uart16550A )
+END DetermineUART ;
+
+
+(*
+   SetUpCommPort - initializes the comm port for receive interrupts
+                   only.
+*)
+
+PROCEDURE SetUpCommPort ;
+VAR
+   BitSet: BITSET ;
+   ch    : CHAR ;
+BEGIN
+   ThisUart := DetermineUART() ;
+   MonStrIO.WriteString('UART type is ') ;
+   CASE ThisUart OF
+
+   UartUnknown:  MonStrIO.WriteString('unknown') |
+   Uart8250   :  MonStrIO.WriteString('8250   ') |
+   Uart16450  :  MonStrIO.WriteString('16450  ') |
+   Uart16550  :  MonStrIO.WriteString('16550  ') |
+   Uart16550A :  MonStrIO.WriteString('16550A ')
+
+   ELSE
+      MonStrIO.WriteString('<detection routine failed>')
+   END ;
+
+   (* Select the type of interrupts we require. *)
+
+   BitSet := {} ;
+   BitSet := VAL(BITSET, In8(ModemContrReg)) ;
+   INCL(BitSet, 3) ;      (* bit 3 must be set, otherwise no  *)
+                          (* interrupts will be generated;    *)
+                          (* see technical reference of       *)
+                          (* IBM-PC, page 1-200               *)
+(*
+   INCL(BitSet, 0) ;      (* set DTR                          *)
+   INCL(BitSet, 1) ;      (* set RTS - always keep active     *)
+*)
+   Out8(ModemContrReg, VAL(BYTE, BitSet)) ;
+
+   (* Enable interrupts in the communications controller (8250):  *)
+   (*        Allow receiver interrupts and transmitter interrupts *)
+   (*        and Modem status interrupts. Specifically CTS.       *)
+
+   Out8(IntEnableReg, VAL(BYTE, {EnableDataAvailableInt})) ;
+   EnableIRQ(IrqNo) ;
+   IF ThisUart=Uart16550A
+   THEN
+      (* enable fifo: clear fifo set trigger at 14 bytes *)
+      Out8(FifoControlReg, 0C7H)
+   END
+END SetUpCommPort ;
+
+
+(*
+   Write - exported user procedure which waits until a char can be sent
+*)
+
+PROCEDURE Write (ch: CHAR) ;
+VAR
+   ToOldState         : OnOrOff ;
+   CopyOfLineStatusReg: BITSET ;
+BEGIN
+   ToOldState := TurnInterrupts(Off) ;
+(*   MonStrIO.WriteString('inside libg.Write') ; MonStrIO.WriteLn ; *)
+(*   MonStrIO.WriteString('before linestatusreg ') ; *)
+   REPEAT
+      CopyOfLineStatusReg := VAL(BITSET, In8(LineStatusReg))
+(*      ; MonStrIO.WriteBin(CARDINAL(CopyOfLineStatusReg), 8) ; MonStrIO.WriteLn ; *)
+   UNTIL TxHoldingRegEmptyBit IN CopyOfLineStatusReg ;
+(*   MonStrIO.WriteString('before transmitreg') ; MonStrIO.WriteLn ; *)
+   Out8(TransmitReg, ch) ;
+   ToOldState := TurnInterrupts(ToOldState)
+(* ; MonStrIO.WriteString('finished Write') ; MonStrIO.WriteLn ; *)
+END Write ;
+
+
+CONST
+   MaxBuffer     = 1024 ;
+
+VAR
+   buff          : ARRAY [0..MaxBuffer] OF CHAR ;
+   count, in, out: CARDINAL ;
+
+
+(*
+   Read - exported user procedure which waits until a
+          character is ready in the buffer.
+*)
+
+PROCEDURE Read (VAR ch: CHAR) ;
+VAR
+   ToOldState         : OnOrOff ;
+   CopyOfLineStatusReg: BITSET ;
+BEGIN
+   ToOldState := TurnInterrupts(Off) ;
+   IF count>0
+   THEN
+      (* something in the buffer - use that *)
+      DEC(count) ;
+      ch := buff[out] ;
+      out := (out+1) MOD MaxBuffer
+   ELSE
+      (* nothing in the buffer wait for something to arrive *)
+      REPEAT
+         CopyOfLineStatusReg := VAL(BITSET, In8(LineStatusReg))
+      UNTIL DataReadyBit IN CopyOfLineStatusReg ;
+      ch := In8(ReceiverReg)
+   END ;
+   ToOldState := TurnInterrupts(ToOldState)
+END Read ;
+
+
+(*
+   IncommingHandler - character received put it into, buff.
+                      If we have received ^C then clean buff and
+                      call breakpoint. - as user has type ^C from gdb.
+*)
+
+PROCEDURE IncommingHandler (irq: CARDINAL) ;
+VAR
+   ch                  : CHAR ;
+   CopyOfModemStatusReg,
+   CopyOfIntIdentReg   ,
+   CopyOfLineStatusReg : BITSET ;
+BEGIN
+   CopyOfIntIdentReg := VAL(BITSET, In8(IntIdentReg)) * {0, 1, 2, 3} ;
+   CASE CopyOfIntIdentReg OF
+
+   NoInterrupt            : (* MonStrIO.WriteString('no interrupt') ; *) |
+   CharacterErrorInterrupt: (* MonStrIO.WriteString('pe fe oe ') *) ;
+                            CopyOfLineStatusReg := VAL(BITSET, In8(LineStatusReg)) |
+   TransmitInterrupt      : (* MonStrIO.WriteString('tx interrupt') ; *)
+                            (* serviced by reading IIR, done above *) |
+   ModemInterrupt         : (* MonStrIO.WriteString('modem interrupt') ; *)
+                            CopyOfModemStatusReg := VAL(BITSET, In8(ModemStatusReg)) |
+   DataFifoInterrupt      ,
+   DataReadyInterrupt     : (* MonStrIO.WriteString('DR interrupt') ; *)
+                            CopyOfLineStatusReg := VAL(BITSET, In8(LineStatusReg)) ;
+                            IF DataReadyBit IN CopyOfLineStatusReg
+                            THEN
+                               ch := In8(ReceiverReg) ;
+                               IF ch=ControlC
+                               THEN
+                                  (* ^C typed - empty the buff and call breakpoint *)
+                                  InitBuffer ;
+                                  breakpoint
+                               ELSE
+                                  (* any room for our new char ? *)
+                                  IF count<MaxBuffer
+                                  THEN
+                                     buff[in] := ch ;
+                                     in := (in+1) MOD MaxBuffer ;
+                                     INC(count)
+                                  END
+                               END
+                            END
+
+   ELSE
+      Halt(__FILE__, __LINE__, __FUNCTION__,
+           'unknown interrupt on the serial port')
+   END ;
+   EnableIRQ(IrqNo)
+END IncommingHandler ;
+
+
+(*
+   InitBuffer - 
+*)
+
+PROCEDURE InitBuffer ;
+BEGIN
+   count := 0 ;
+   in := 0 ;
+   out := 0
+END InitBuffer ;
+
+
+(*
+   Init - initialize the data structures and entities in this module.
+*)
+
+PROCEDURE Init ;
+BEGIN
+   IrqNo := GetIrqNo(IOBase) ;
+   MonStrIO.WriteString('Serial device at ') ; MonStrIO.WriteHex(IOBase, 4) ;
+   MonStrIO.WriteString('  irq no') ; MonStrIO.WriteCard(IrqNo, 4) ;
+   MonStrIO.WriteString(' ') ;
+   IF IrqNo=256
+   THEN
+      MonStrIO.WriteString(' does not exist\n')
+   ELSE
+      InitIRQ(IrqNo, IncommingHandler) ;
+      InitBuffer ;
+      SetUpCommPort ;
+      IF InitDevice(38400, 1, 8, None)
+      THEN
+         MonStrIO.WriteString(' initialized\n')
+      ELSE
+         MonStrIO.WriteString(' failed\n')
+      END
+   END
+END Init ;
+
+
+END libg.

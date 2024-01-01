@@ -1,0 +1,11 @@
+
+all: stabs.smp stabs.elf
+
+stabs.smp: force
+	gcc -o stabs.smp -I../../../TSX11/smp-binutils-2.5.2/include -I../../../TSX11/smp-binutils-2.5.2/bfd -g stabs.c ../../../TSX11/smp-binutils-2.5.2/opcodes/libopcodes.a  ../../../TSX11/smp-binutils-2.5.2/bfd/libbfd.a ../../../TSX11/smp-binutils-2.5.2/libiberty/libiberty.a -lm
+
+stabs.elf: force
+	gcc -o stabs.elf -I../../../TSX11/binutils-2.8.1/include -I../../../TSX11/binutils-2.8.1/bfd -g stabs.c ../../../TSX11/binutils-2.8.1/opcodes/libopcodes.a  ../../../TSX11/binutils-2.8.1/bfd/libbfd.a ../../../TSX11/binutils-2.8.1/libiberty/libiberty.a -lm
+
+
+force:

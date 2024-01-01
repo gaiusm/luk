@@ -1,0 +1,297 @@
+IMPLEMENTATION MODULE libg ;
+
+(*
+    Title      : libg
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Fri Sep  9 08:12:01 1994
+    Last edit  : Fri Sep  9 08:12:01 1994
+    Description: Contains a very simple polling Read and Write
+                 routine which is used by gdb.
+*)
+
+
+FROM PortIO IMPORT In8, Out8 ;
+FROM SYSTEM IMPORT LISTEN, TurnInterrupts, OnOrOff, BYTE, BITSET ;
+FROM DeviceConfiguration IMPORT Parity, GetIrqNo ;
+IMPORT MonStrIO ;
+
+
+
+(* Set up constants for the ports that are accessed.               *)
+
+CONST
+   (* the following constant declaration may be modified to change *)
+   (* the module for the alternate communications adapter.         *)
+
+   Com1 = 1 ; (* = 1 means TRUE  or COM1 is used *)
+              (* = 0 means FALSE or COM2 is used *)
+
+   IrqBase= 020H ;   (* irq interrupts live from 020..030 *)
+
+   IOBase = 2F8H + Com1 * 100H;
+
+   LineContrReg    = IOBase+03H; (* to specify format of transmitted data  *)
+   LowBaudRateDiv  = IOBase+00H; (* lower byte of divisor                  *)
+   HighBaudRateDiv = IOBase+01H; (* higher byte of divisor                 *)
+   LineStatusReg   = IOBase+05H; (* holds status info on the data transfer *)
+   ReceiverReg     = IOBase+00H; (* received char is in this register      *)
+   TransmitReg     = IOBase+00H; (* char to send is to put in this reg     *)
+   IntEnableReg    = IOBase+01H; (* to enable the selected interrupt       *)
+   ModemContrReg   = IOBase+04H; (* controls the interface to a modem      *)
+   IntIdentReg     = IOBase+02H; (* Determines what caused interrupt.      *)
+   ModemStatusReg  = IOBase+06H; (* Determines status on the ctrl lines.   *)
+
+   (* Line Status Registers Bits *)
+
+   DataReadyBit         = 00H ;
+   OverrunErrorBit      = 01H ;
+   ParityErrorBit       = 02H ;
+   FramingErrorBit      = 03H ;
+   BreakIndicatorBit    = 04H ;
+   TxHoldingRegEmptyBit = 05H ;
+   TxShiftRegEmptyBit   = 06H ;
+   FifoErrorBit         = 07H ;
+
+   (* Interrupt Enable Register Bits *)
+
+   EnableDataAvailableInt     = 00H ;
+   EnableTxHoldingRegEmptyInt = 01H ;
+   EnableStatusInt            = 02H ;
+   EnableModemStatusInt       = 03H ;
+
+   (* Interrupt Identification Register Bits *)
+
+   ReceiverDataReadyBit       = 01H ;
+   TransmitterDataReadyBit    = 02H ;
+
+VAR
+   IrqNo     : CARDINAL ;
+
+
+(*
+   DLAB - sets the DLAB bit to 0 or 1.
+*)
+
+PROCEDURE DLAB (Bit: CARDINAL) ;
+VAR
+   Status : BITSET ;
+   Byte   : CHAR ;
+BEGIN
+   Byte := In8( LineContrReg ) ;
+   Status := BITSET( ORD( Byte ) ) ;
+   IF Bit=1
+   THEN
+      INCL(Status, 7)
+   ELSE
+      EXCL(Status, 7)
+   END ;
+   Out8(LineContrReg, VAL(BYTE, Status))
+END DLAB ;
+
+
+(*
+   InitDevice - Initializes the serial port to specific values.
+                The legal values for the parameters are:
+                    BaudRate  : 300..9600
+                    StopBits  : 1..2
+                    WordLength: 5..8
+*)
+
+PROCEDURE InitDevice (BaudRate, StopBits, WordLength: CARDINAL; p: Parity) : BOOLEAN ;
+VAR
+   DivisorLow,
+   DivisorHigh: BYTE ;
+   Parameters : BITSET ;
+BEGIN
+   CASE BaudRate OF
+
+   300   : DivisorLow := 80H ;
+           DivisorHigh := 1H |
+
+   600   : DivisorLow := 0C0H ;
+           DivisorHigh := 0H |
+
+   1200  : DivisorLow := 60H ;
+           DivisorHigh := 0H |
+
+   2400  : DivisorLow := 30H ;
+           DivisorHigh := 0H |
+
+   4800  : DivisorLow := 18H ;
+           DivisorHigh := 0H |
+
+   9600  : DivisorLow := 0CH ;
+           DivisorHigh := 0H |
+
+   19200 : DivisorLow := 06H ;
+           DivisorHigh := 0H |
+
+   38400 : DivisorLow := 03H ;
+           DivisorHigh := 0H
+
+   ELSE
+      RETURN( FALSE )
+   END ;
+
+   (* load the Divisor of the baud rate generator: *)
+   DLAB(1) ;
+   Out8(HighBaudRateDiv, DivisorHigh) ;
+   Out8(LowBaudRateDiv, DivisorLow) ;
+   DLAB(0) ;
+
+   (* prepare the Parameters: *)
+   Parameters := {};
+   IF StopBits=2
+   THEN
+      INCL(Parameters, 2) ;
+   ELSIF StopBits#1
+   THEN
+      RETURN( FALSE )
+   END ;
+   IF (p=Odd) OR (p=Even)
+   THEN
+      INCL(Parameters, 3) ;
+      IF p=Even
+      THEN
+         INCL(Parameters, 4)
+      END
+   END ;
+   CASE WordLength OF
+
+   5 : |
+   6 : INCL(Parameters, 0) |
+   7 : INCL(Parameters, 1) |
+   8 : INCL(Parameters, 0) ;
+       INCL(Parameters, 1)
+
+   ELSE
+      RETURN( FALSE )
+   END ;
+   Out8(LineContrReg, VAL(BYTE, Parameters)) ;
+   RETURN( TRUE )
+END InitDevice ;
+
+
+(*
+   SetUpCommPort - clears the UART registers ready for initialization.
+*)
+
+PROCEDURE SetUpCommPort ;
+VAR
+   BitSet: BITSET ;
+   ch    : CHAR ;
+   Pri   : CARDINAL ;
+BEGIN
+   (* Disable Interrupts *)
+   DLAB(0) ;
+   Out8(LineContrReg, 0H) ;
+   Out8(IntEnableReg, 0H) ;
+
+   (* clear the controller: *)
+   BitSet := VAL(BITSET, In8(LineStatusReg)) ;
+   IF DataReadyBit IN BitSet
+   THEN
+      (* data ready *)
+      ch := In8(ReceiverReg)
+   END ;
+
+   IF TxHoldingRegEmptyBit IN BitSet
+   THEN
+      Out8(TransmitReg, ch)
+   END ;
+
+   (* We can set the line status to {} see page 1-213 of the IBM-PC *)
+   (* technical manual.                                             *)
+
+   (* Select the type of interrupts we require ie none.. *)
+   Out8(LineStatusReg, 00H) ;   (* Controller cleared *)
+END SetUpCommPort ;
+
+
+
+(*
+   CheckControl - 
+*)
+
+PROCEDURE CheckControl (CopyOfLineStatusReg: BITSET) ;
+BEGIN
+   IF OverrunErrorBit IN CopyOfLineStatusReg
+   THEN
+      MonStrIO.WriteString('<overrun>')
+   END ;
+   IF ParityErrorBit IN CopyOfLineStatusReg
+   THEN
+      MonStrIO.WriteString('<parity>')
+   END ;
+   IF FramingErrorBit IN CopyOfLineStatusReg
+   THEN
+      MonStrIO.WriteString('<framing>')
+   END ;
+   IF BreakIndicatorBit IN CopyOfLineStatusReg
+   THEN
+      MonStrIO.WriteString('<break>')
+   END
+END CheckControl ;
+
+
+(*
+   Read - exported user procedure which waits until a
+          character is ready in the buffer.
+*)
+
+PROCEDURE Read (VAR ch: CHAR) ;
+VAR
+   ToOldState         : OnOrOff ;
+   CopyOfLineStatusReg: BITSET ;
+BEGIN
+   ToOldState := TurnInterrupts(Off) ;
+   REPEAT
+      CopyOfLineStatusReg := VAL(BITSET, In8(LineStatusReg))
+   UNTIL DataReadyBit IN CopyOfLineStatusReg ;
+   ch := In8(ReceiverReg) ;
+   ToOldState := TurnInterrupts(ToOldState)
+END Read ;
+
+
+(*
+   Write - exported user procedure which waits until a char can be sent
+*)
+
+PROCEDURE Write (ch: CHAR) ;
+VAR
+   ToOldState         : OnOrOff ;
+   CopyOfLineStatusReg: BITSET ;
+BEGIN
+   ToOldState := TurnInterrupts(Off) ;
+   REPEAT
+      CopyOfLineStatusReg := VAL(BITSET, In8(LineStatusReg))
+   UNTIL TxHoldingRegEmptyBit IN CopyOfLineStatusReg ;
+   Out8(TransmitReg, ch) ;
+   ToOldState := TurnInterrupts(ToOldState)
+END Write ;
+
+
+PROCEDURE Init ;
+VAR
+   IrqNo: CARDINAL ;
+BEGIN
+   IrqNo := GetIrqNo(IOBase) ;
+   MonStrIO.WriteString('Serial device at ') ; MonStrIO.WriteHex(IOBase, 4) ;
+   MonStrIO.WriteString('  irq no') ; MonStrIO.WriteCard(IrqNo, 4) ;
+   IF IrqNo=256
+   THEN
+      MonStrIO.WriteString(' does not exist\n')
+   ELSE
+      SetUpCommPort ;
+      IF InitDevice( 19200, 1, 8, None)
+      THEN
+         MonStrIO.WriteString(' initialized\n')
+      ELSE
+         MonStrIO.WriteString(' failed\n')
+      END
+   END
+END Init ;
+
+
+END libg.

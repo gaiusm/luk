@@ -1,0 +1,8 @@
+@section timerhandler
+
+In this exercise you should complete the functions ArmEvent and Timer
+in the file @file{timerhandler/TimerHandler.c}.
+
+There is an initial attempt of @file{TimerHandler.c} in this directory
+and this can be built using the generic building instructions found in
+this document.

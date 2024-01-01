@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+# a simple shell script which, when run as root, will configure the Linux clients
+# correctly for RSDI
+#
+
+
+# step 1 allow everyone to write to the floppydisk!
+
+chmod 777 /dev/fd*
+
+# step 2 create a link from /var/global to /home3/s1/global
+
+if grep home3/s1 /etc/fstab >& /dev/null ; then
+   if [ -L /var/global ] ; then
+      echo "old symbolic link exists - I'm going to remove it"
+      /bin/rm -f /var/global
+   elif [ -f /var/global ] ; then
+      echo "/var/global is a regular file - I'll move it out of the way   (into /var/global.old)"
+      mv /var/global /var/global.old
+   elif [ -d /var/global ] ; then
+      echo "directory exists - I'll move it out of the way   (into /var/global.old)"
+      mv /var/global /var/global.old
+   fi
+   echo "now to create the new symbolic link"
+   ln -s /home3/s1/global /var/global
+else
+   echo "hmm I need to add mount entry in /etc/fstab. I really need this line:"
+   echo "s1:/home3/s1	/home3/s1	nfs	timeo=14,intr	# access to SPARC fs linux system files"
+   echo " "
+   echo "hold tight I'm going to add it myself"
+   echo "s1:/home3/s1	/home3/s1	nfs	timeo=14,intr	# access to SPARC fs linux system files" >> /etc/fstab
+   echo "done. /etc/fstab now looks like:"
+   cat /etc/fstab
+   echo "now to mount the filesystem"
+   mount -a
+   echo "and now I can create the symbolic link"
+   echo ln -s /home3/s1/global /var/global
+fi
+echo "installation complete"
+echo "now removing script"
+/bin/rm doit
+ls -l /var/global/

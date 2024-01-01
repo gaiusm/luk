@@ -1,0 +1,23 @@
+DEFINITION MODULE Stty ;
+
+(*
+   Title      : Stty
+   Author     : Gaius Mulley
+   Date       : 27/2/88
+   LastEdit   : 27/2/88
+   System     : LOGITECH MODULA-2/86
+   Description: Stty allows the console user to set the serial port
+                attributes.
+*)
+
+EXPORT QUALIFIED DoStty ;
+
+
+(*
+   DoStty - sets the desired ports to a baud rate, parity and stop bits.
+*)
+
+PROCEDURE DoStty ;
+
+
+END Stty.

@@ -1,0 +1,24 @@
+DEFINITION MODULE KeyBoardConvert ;
+
+
+FROM StdIO IMPORT ProcWrite ;
+
+EXPORT QUALIFIED ConsoleSwitchProc, ScanToASCII, SetFunctionString ;
+
+
+TYPE
+   ConsoleSwitchProc = PROCEDURE (CARDINAL) ;
+
+
+PROCEDURE ScanToASCII (ReadDeliver: ProcWrite ; ch: CHAR; ConsoleSwitch: ConsoleSwitchProc) ;
+
+
+(*
+   SetFunctionString - sets a function key to deliver a string, a,
+                       when pressed.
+*)
+
+PROCEDURE SetFunctionString (Function: CARDINAL; a: ARRAY OF CHAR) ;
+
+
+END KeyBoardConvert.

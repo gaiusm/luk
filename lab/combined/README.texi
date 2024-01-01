@@ -1,0 +1,6 @@
+@section combined
+
+This does not require any extra work, but allows students to see
+their combined C files all working in the microkernel.  It will have
+been necessary to complete all previous exercises (bug free) to see
+this successfully work.

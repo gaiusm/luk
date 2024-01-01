@@ -1,0 +1,25 @@
+DEFINITION MODULE SetFn ;
+
+(*
+   Title      : SetFn
+   Author     : Gaius Mulley
+   Date       : 9/8/89
+   LastEdit   : 9/8/89
+   System     : LOGITECH MODULA-2/86
+   Description: Allows the console user to set the function keys.
+*)
+
+EXPORT QUALIFIED DoSetFn ;
+
+
+(*
+   DoSetFn - sets the function key, Function, to String.
+             This string may contain ^x or ^X which is interpreted as
+             <Ctrl> X.
+             Usage: setfn Function String
+*)
+
+PROCEDURE DoSetFn ;
+
+
+END SetFn.

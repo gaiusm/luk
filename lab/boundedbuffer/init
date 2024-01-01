@@ -1,0 +1,61 @@
+# ASCII    8
+# StrLib    7
+# PortIO    7
+# NumberIO    6
+# IRQ    6
+# StrIO    6
+# StdIO    5
+# Scn    5
+# SYSTEM    5
+# Descriptors    5
+# WordSizes    5
+# OSParameters    5
+# Dump    5
+# osinit    4
+# MonStrIO    4
+# InterruptVector    4
+# MemRegion    4
+# Storage    3
+# Exceptions    3
+# crt0    3
+# libg    3
+# gdb    3
+# M2RTS    2
+# hello    1
+#
+# Initialization order
+#
+crt0
+initsubsystem
+M2RTS
+Storage
+Exceptions
+osinit
+ASCII
+StrLib
+PortIO
+NumberIO
+IRQ
+StrIO
+StdIO
+Scn
+SYSTEM
+Descriptors
+WordSizes
+OSParameters
+Dump
+MonStrIO
+InterruptVector
+MemRegion
+libg
+gdb
+Executive
+NonAscii
+KeyBoardLEDs
+Colours
+KeyBoardConvert
+ColourText
+BufferDevice
+WindowDevice
+TTIO
+processes

@@ -1,0 +1,166 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename luk.info
+@set version-luk     1.0
+@set updated-last    2011-11-02
+@settitle GNU lean microkernel @value{version-luk}
+@c %**end of header
+
+@syncodeindex pg cp
+
+
+@copying
+This manual is for GNU lean microkernel
+(version @value{version-luk}, @value{updated-last}).
+
+Copyright @copyright{} 2011 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License.''
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
+@end quotation
+@end copying
+
+@dircategory Texinfo documentation system
+@direntry
+* luk: (luk)Lean micro kernel.
+@end direntry
+
+@titlepage
+@title GNU lean microkernel (LUK)
+@subtitle for version @value{version-luk}, @value{updated-last}
+@author Gaius Mulley <@email{gaius@@gnu.org}>
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top, , (dir), (dir)
+@top GNU LUK
+
+@insertcopying
+@end ifnottex
+
+@menu
+* About LUK::
+* Obtaining LUK::
+* Building LUK::
+* Lab exercises::
+* Copying This Manual::
+* Index::
+@end menu
+
+@node About LUK, , (dir), (dir)
+@chapter About LUK
+
+LUK is a lean microkernel whose primary purpose is to teach the
+principles of microkernels.  It runs on x86_32 PC hardware and
+boots from a USB memory stick.  When it boots it is the sole
+system, there is no linux, windows or whatever.
+
+LUK is written in C, Modula-2 and assembly language.  All the lab
+exercises are available in C and (or Modula-2) students can study the
+microkernel in either language if desired.  Students do not need to
+be familiar with Modula-2 in order to complete the C lab exercises.
+
+LUK runs in 32 bit protected mode and can create an arbitary number
+of lightweight processes using the @code{Executive} module.
+It has @code{Timerhandler} module for creating time related events
+a keyboard and screen device driver.  There is also a very primative
+text based window device.
+
+LUK coordinates interrupts and processes via semaphores implemented in
+the @code{Executive}.  It currently uses a simple round robin
+scheduler to allocate processor time to the runnable processes.
+
+@node Obtaining LUK, , (dir), (dir)
+@chapter Obtaining LUK
+
+You can download a copy LUK from
+@uref{http://floppsie.comp.glam.ac.uk/download/luk/luk-@value{version-luk}.tar.gz}
+and then you need to extract the archive using the following command
+line:
+
+@example
+$ tar xvf luk-@value{version-luk}.tar.gz
+@end example
+
+@node Building dependencies, , (dir) (dir)
+
+LUK requires the following packages to be installed.
+
+The GNU C compiler @file{gcc}, GNU Modula-2 @file{gm2}, GNU make
+@file{make}, GNU binutils @file{binutils}, @file{m2f} and Bruce Evan's
+assembler (@file{bin86}.
+
+Assuming that you are on a Debian or Ubuntu based system you could
+obtain @file{gm2} and @file{m2f} by adding these entries to
+your @file{/etc/apt/sources.list}.
+
+@example
+#
+#  GNU Modula-2 repo
+#
+
+deb http://floppsie.comp.glam.ac.uk/debian/ squeeze main 
+deb-src http://floppsie.comp.glam.ac.uk/debian/ squeeze main
+@end example
+
+Now there can be installed by the following commands:
+
+@example
+$ sudo apt-get update
+$ sudo apt-get install bin86 libc6-dev-i386 gm2 gcc m2f
+@end example
+
+@node Building LUK, , (dir), (dir)
+
+You can build LUK by:
+
+@example
+$ mkdir -p build $HOME/opt
+$ cd build
+$ ../luk-@value{version-luk}/configure --prefix=$HOME/opt
+$ make
+$ cd ..
+@end example
+
+@node Lab exercises, , (dir), (dir)
+@chapter Lab exercises
+
+@include lab/hello/README.texi
+@include lab/debug/README.texi
+@include lab/scn/README.texi
+@include lab/boundedbuffer/README.texi
+@include lab/executive/README.texi
+@include lab/timerhandler/README.texi
+@include lab/processes/README.texi
+@include lab/combined/README.texi
+
+@node Copying This Manual, , (dir), (dir)
+@appendix Copying This Manual
+
+@menu
+* GNU Free Documentation License::  License for copying this manual.
+@end menu
+
+@include fdl.texi
+
+@node Index, , (dir), (dir)
+@unnumbered Index
+
+@printindex cp
+
+@bye

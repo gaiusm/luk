@@ -1,0 +1,102 @@
+DEFINITION MODULE SYSTEM ;
+
+(*
+   Author     : Gaius Mulley
+   Title      : SYSTEM
+   Date       : 3/4/86
+   Description: Implements the SYSTEM dependant module
+                in the Modula-2 compiler.
+   Last update: 9/9/89  - types and pseudo procedures exported:
+                          ADR, SIZE, TSIZE.
+                29/7/94 - started to add items to SYSTEM.mod
+                          added In, Out.
+                3/8/94  - added TRANSFER
+                4/8/94  - added NEWPROCESS
+                10/8/94 - added IOTRANSFER
+                12/8/94 - added LISTEN
+                23/7/97 - removed port io and placed into separate module.
+                12/9/2011 - ported LUK to the GNU Modula-2.
+
+   $Version$
+
+   $Log: SYSTEM.def,v $
+   Revision 1.2  1996-07-26 12:05:09  gaius
+   added minor support modules for the larger test MorlocTower
+*)
+
+EXPORT QUALIFIED (* the following are built into the compiler: *)
+                 ADDRESS, WORD, BYTE, BITSET, ADR, TSIZE,
+
+                 (* and the rest are implemented in SYSTEM.mod *)
+                 OnOrOff, TurnInterrupts,
+                 PROCESS, TRANSFER, NEWPROCESS, IOTRANSFER,
+                 LISTEN, CheckOff,
+
+                 (* Init is ONLY exported for M2RTS *)
+                 Init ;
+
+
+TYPE
+   OnOrOff = (On, Off) ;
+   PROCESS ;
+
+
+(*
+   TRANSFER - save the current volatile environment into, p1.
+              Restore the volatile environment from, p2.
+*)
+
+PROCEDURE TRANSFER (VAR p1: PROCESS; p2: PROCESS) ;
+
+
+(*
+   NEWPROCESS - p is a parameterless procedure, a, is the origin of
+                the workspace used for the process stack and containing
+                the volatile environment of the process. n, is the amount
+                in bytes of this workspace. new, is the new process.
+*)
+
+PROCEDURE NEWPROCESS (p: PROC; a: ADDRESS; n: CARDINAL; VAR new: PROCESS) ;
+
+
+(*
+   IOTRANSFER - saves the current volatile environment into, First,
+                and restores volatile environment, Second.
+                When an interrupt, InterruptNo, is encountered then
+                the reverse takes place. (The then current volatile
+                environment is shelved onto Second and First is resumed).
+
+                NOTE: that upon interrupt the Second might not be the
+                      same process as that before the original call to
+                      IOTRANSFER.
+*)
+
+PROCEDURE IOTRANSFER (VAR First, Second: PROCESS; InterruptNo: CARDINAL) ;
+
+
+(*
+   LISTEN - briefly listen for any interrupts.
+*)
+
+PROCEDURE LISTEN ;
+
+
+(*
+   TurnInterrupts - switches interrupts on or off depending
+                    on Switch. It returns the old value.
+*)
+
+PROCEDURE TurnInterrupts (Switch: OnOrOff) : OnOrOff ;
+
+
+(*
+   Init - initialize SYSTEM data structures. IOTRANSFER process tables.
+*)
+
+PROCEDURE Init ;
+
+
+PROCEDURE CheckOff ;
+
+
+END SYSTEM.

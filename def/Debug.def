@@ -1,0 +1,46 @@
+DEFINITION MODULE Debug ;
+
+(*
+    Title      : Debug
+    Author     : 
+    System     : UNIX (gm2)
+    Date       : Sat Aug 13 19:41:57 1994
+    Last edit  : Sat Aug 13 19:41:57 1994
+    Description: provides some simple debugging routines.
+*)
+
+FROM SYSTEM IMPORT ADDRESS ;
+
+EXPORT QUALIFIED Halt, DebugString, DebugCString ;
+
+
+(*
+   Halt - writes a message in the format:
+          Module:Line:Message
+
+          to the debugging device. (Scn.Write).
+          It then terminates by looping forever.
+*)
+
+PROCEDURE Halt (Message: ARRAY OF CHAR;
+                LineNo: CARDINAL;
+                Module: ARRAY OF CHAR) ;
+
+
+(*
+   DebugString - writes a string to the debugging device (Scn.Write).
+                 It interprets \n as carriage return, linefeed.
+*)
+
+PROCEDURE DebugString (a: ARRAY OF CHAR) ;
+
+
+(*
+   DebugCString - writes a string to the debugging device (Scn.Write).
+                  It interprets \n as carriage return, linefeed.
+*)
+
+PROCEDURE DebugCString (a: ADDRESS) ;
+
+
+END Debug.

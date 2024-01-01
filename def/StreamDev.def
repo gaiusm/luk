@@ -1,0 +1,31 @@
+DEFINITION MODULE StreamDev ;
+
+(*
+   Title      : StreamDev
+   Author     : Gaius Mulley
+   Date       : 11/8/89
+   LastEdit   : 11/8/89
+   System     : LOGITECH MODULA-2/86
+   Description: Provides a textual command to set up a stream.
+*)
+
+FROM IO IMPORT STREAM ;
+
+EXPORT QUALIFIED SetStream, LsDev ;
+
+
+(*
+   SetStream - sets the STREAM, s, to any io dependant upon string, a.
+*)
+
+PROCEDURE SetStream (s: STREAM; a: ARRAY OF CHAR) ;
+
+
+(*
+   LsDev - displays the character devices.
+*)
+
+PROCEDURE LsDev ;
+
+
+END StreamDev.

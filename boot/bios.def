@@ -1,0 +1,92 @@
+DEFINITION MODULE bios ;
+
+(*
+    Title      : Util
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Thu Jul 21 16:16:07 1994
+    Last edit  : Thu Jul 21 16:16:07 1994
+    Description: provides basic BIOS interface for the startup code.
+*)
+
+EXPORT QUALIFIED GetGeometry, GetExtendedSize, SetKeyboard,
+                 GetSectorsPerTrack, ReadTrack,
+                 GetVideoMode, Get16, Put16,
+                 CursorOff,
+                 OSSize, OSStart, SecondSize, SecondData,
+                 DebuggingWithGDB, StackSize, DriveNo ;
+
+
+VAR
+   DriveNo,
+   OSSize, OSStart, SecondSize, SecondData,
+   DebuggingWithGDB, StackSize            : CARDINAL ;
+
+
+(*
+   GetGeometry - assigns correct values to heads and sectors for drive.
+*)
+
+PROCEDURE GetGeometry (drive: CARDINAL; VAR heads, sectors: CARDINAL) ;
+
+
+(*
+   GetExtendedSize - returns the extended memory size in kB.
+*)
+
+PROCEDURE GetExtendedSize () : CARDINAL ;
+
+
+(*
+   SetKeyboard - set the keyboard repeat rate to the maximum.
+*)
+
+PROCEDURE SetKeyboard ;
+
+
+(*
+   GetSectorsPerTrack - return the number of sectors per track
+                        on diskette A.
+*)
+
+PROCEDURE GetSectorsPerTrack () : CARDINAL ;
+
+
+(*
+   ReadTrack - read in a track from, Head, Drive, Track, Sector
+               NoOfSectors and the address.
+*)
+
+PROCEDURE ReadTrack (Head, Drive, Track, Sector, NoOfSectors,
+                     SegAddr, OffsetAddr: CARDINAL) : BOOLEAN ;
+
+
+(*
+   GetVideoMode - returns the video mode number obtained from the BIOS.
+*)
+
+PROCEDURE GetVideoMode () : CARDINAL ;
+
+
+(*
+   Get16 - returns a 16 bit word from seg, offset.
+*)
+
+PROCEDURE Get16 (Segment, Offset: CARDINAL) : CARDINAL ;
+
+
+(*
+   Put16 - places a 16 bit word into seg, offset.
+*)
+
+PROCEDURE Put16 (Segment, Offset: CARDINAL; word: CARDINAL) ;
+
+
+(*
+   CursorOff - switches the cursor off.
+*)
+
+PROCEDURE CursorOff ;
+
+
+END bios.

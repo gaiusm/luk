@@ -1,0 +1,19 @@
+@section debug
+
+In this exercise you should implement the function DebugString inside
+the file @file{Debug.c}.  Notice that there are two parameters to
+DebugString the pointer to the start of the string and the maximum
+number of characters which maybe in the string.
+
+All characters from the pointer up until the @code{<nul>} character
+@code{(char)0} should be emitted.  No more than the maximum number of
+characters should be emitted, in case there is no trailing
+@code{(char)0}.
+
+There is an initial attempt of @code{Debug.c} in this directory and
+this can be built using the generic building instructions found in
+this document.
+
+Your function @code{DebugString} must check for the character sequence
+'\' 'n' and this should be cause a newline to be printed.  Hint you
+should call @code{WriteLn}.

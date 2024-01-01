@@ -1,0 +1,14 @@
+@section scn
+
+In this exercise you should complete the screen device driver Scn.c.
+
+There is an initial attempt of @code{Scn.c} in this directory and this
+can be built using the generic building instructions found in this
+document.  You need to complete the function @code{ScrollUp} which
+should move each line up the screen and then finally blank the bottom
+line.
+
+The screen can be accessed via the pointer to array
+@code{(*screen)[j][i]}.  The screen top row is accessed via
+@code{(*screen)[0][i]}.  Where @code{i} can have any value
+@code{0..Width-1} which represents the columns (left to right).

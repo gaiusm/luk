@@ -1,0 +1,39 @@
+#!/bin/bash
+
+image=$1
+drive=$2
+
+attempts=0
+allowed=10
+
+function tryCopy () {
+    if df | grep ${drive} ; then
+	echo -n "${drive} is mounted, attempting umount..."
+	if umount ${drive} ; then
+            echo "ok"
+	else
+            echo "failed"
+	    return
+	fi
+    fi
+
+    if dd if=${image} of=${drive} ; then
+	sync
+	echo "all is okay copied the image to ${drive}"
+	exit 0
+    fi
+}
+
+
+echo "now going to copy ${image} onto ${drive}, press ^C if this is incorrect"
+echo "${drive} will be completely trashed"
+read ans
+
+while [ ${attempts} -lt ${allowed} ] ; do
+    tryCopy
+    attempts=`expr ${attempts} + 1`
+    sleep 1
+done
+echo "tried ${allowed} times but have failed to write ${image} to ${drive}"
+exit 1
+

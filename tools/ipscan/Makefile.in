@@ -1,0 +1,14 @@
+CC = gcc
+EXEC= statnet
+
+CFLAGS=-O6
+DEFS= stat.h
+OBJECTS= stat.o itstime.o set_null.o
+
+all:	$(EXEC)
+
+statnet:	$(OBJECTS) $(DEFS)
+		$(CC) -o $(EXEC) $(CFLAGS) $(OBJECTS)
+
+clean:
+	rm -f *.o $(EXEC) *~

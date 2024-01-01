@@ -1,0 +1,77 @@
+%!PS-Adobe-2.0
+%%Creator: enscript on floppsie
+%%CreationDate: Thu Aug 18 13:00:33 1994
+%%For: gaius
+%%DocumentFonts: Courier
+%%Pages: (atend)
+%%EndComments
+% PostScript Prologue for lwf V2.0 ASCII to PostScript filter
+% Barry Brachman
+% Dept. of Computer Science
+% University of British Columbia
+/B {NW 0 rmoveto}bind def
+/EP {SV restore /#copies exch def showpage}bind def
+/L /lineto load def
+/M /moveto load def
+/NP /newpath load def
+/S /show load def
+/SHP {SP 2 setlinewidth}bind def
+/SLP {SP 612 0 translate 90 rotate}bind def
+/SP {/SV save def findfont exch scalefont setfont ( )
+  stringwidth pop dup /W exch def neg /NW exch def}bind def
+/ST /stroke load def
+/T {W mul 0 rmoveto}bind def
+%%EndProlog
+%%Page: ? 1
+7 /Courier SLP
+25 562 M
+(Aug 18 13:00 1994   Page 1)S
+25 541 M
+(IMPLEMENTATION MODULE Translate;)S 58 T (   Found)S 8 T (    : BOOLEAN ;)S
+25 534 M
+90 T (   b)S 12 T (    : BYTE ;)S
+25 527 M
+90 T (   OperandDefinition: ARRAY [0..MaxInstructionBytes] OF CHAR ;)S
+25 520 M
+(FROM SYSTEM IMPORT BYTE, ADR ;)S 68 T ( OpcodeDefinition ,)S
+25 513 M
+(FROM Args IMPORT GetArg ;)S 65 T (   OperandName)S 2 T (     ,)S
+25 506 M
+(FROM StrIO IMPORT WriteString, WriteLn ;)S 50 T (   OpcodeName)S 3 T (    : CARDINAL ;)S
+25 499 M
+(FROM StdIO IMPORT Write ;)S 65 T (BEGIN)S
+25 492 M
+(FROM NumberIO IMPORT WriteHex, BinToStr, StrToCard, WriteCard, StrToBin ;)S 17 T (   InitVarDB ;)S
+25 485 M
+(FROM StrLib IMPORT StrLen, StrCopy, StrConCat, StrEqual, IsSubString ;)S 28 T ( IndirectGetByte := GetByte ;)S
+25 478 M
+(FROM InstrDB IMPORT MaxInstructionBytes, MaxInstructionLength,)S 36 T ( NoOfBytes := 0 ;)S
+25 471 M
+16 T (    PutInstruction, GetInstruction, MakeMatchString,)S 22 T (   NoOfDataBytes := 0 ;)S 1 T (  \(* No data bytes found yet *\))S
+25 464 M
+16 T (    PutOperand, GetOperand ;)S 46 T (   NoOfMemoryOperands := 0 ;  \(* no memory operands yet  *\))S
+25 457 M
+(FROM AOUT IMPORT IsProcessor16Bit ;)S 55 T (   MemoryOperandOffset := 0 ;)S
+25 450 M
+(FROM VarDB IMPORT InitVarDB, GetValue, PutValue, IsValue ;)S 32 T (   IF IgnoreInstructions)S
+25 443 M
+(FROM NameKey IMPORT WriteKey, GetKey, MakeKey, NulName ;)S 34 T (   THEN)S
+25 436 M
+(FROM ASCII IMPORT nul ;)S 75 T (     NoOfBytes := GetNBytes\(MaxBytesPerLine\) ;)S
+25 429 M
+90 T (      DisplayBytes\(CurrentAddress, 0, NoOfBytes\))S
+25 422 M
+90 T (   ELSE)S
+25 415 M
+(CONST)S 93 T (   REPEAT)S
+25 408 M
+(   MaxStack)S 5 T (   = 20 ;)S 73 T (  Found := FindInstruction\(OpcodeDefinition, OpcodeName\) ;)S
+25 401 M
+(   Quote)S 8 T (   = '"' ;)S 72 T (   IF NOT Found)S
+25 394 M
+(   Begin)S 8 T (   = '<' ;)S 72 T (   THEN)S
+25 387 M
+(   End)S 10 T (   = '>' ;)S 72 T (      PushBackUpTo\(NoOfDataBytes\) ;)S
+25 380 M
+(   BitField)S 5 T (   = ':' ;)S 72 T (      IF LocalGetByte\(b\))S
+2

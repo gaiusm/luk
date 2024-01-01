@@ -1,0 +1,32 @@
+DEFINITION MODULE Dump ;
+
+(*
+    Title      : Dump
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Thu Aug  4 16:39:08 1994
+    Last edit  : Thu Aug  4 16:39:08 1994
+    Description: provides a crude hex dump of memory.
+*)
+
+FROM SYSTEM IMPORT ADDRESS ;
+EXPORT QUALIFIED DumpDown, DumpUp ;
+
+
+(*
+   DumpDown - displays Length bytes in WORDs starting at, Top,
+              and working down.
+*)
+
+PROCEDURE DumpDown (Top: ADDRESS; Length: CARDINAL) ;
+
+
+(*
+   DumpUp - displays Length bytes in WORDs starting at, Bot,
+            and working up.
+*)
+
+PROCEDURE DumpUp (Bot: ADDRESS; Length: CARDINAL) ;
+
+
+END Dump.

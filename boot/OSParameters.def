@@ -1,0 +1,31 @@
+DEFINITION MODULE OSParameters ;
+
+(*
+    Title      : OSParameters
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Mon Aug  1 11:44:46 1994
+    Last edit  : Mon Aug  1 11:44:46 1994
+    Description: defines the locations for the parameters to be
+                 passed from the second boot stage to the OS.
+                 These constants are used by second.mod and the
+                 386/486 realtime system.
+*)
+
+EXPORT QUALIFIED ExtendedMemAddr,   VideoAddrAddr,
+                 OSSizeAddr,        NoOfSectorsAddr,
+                 DebuggingAddr,     StackSizeAddr ;
+
+
+CONST
+   ParametersToOS = 640 * 1024 ;
+
+   ExtendedMemAddr  = ParametersToOS-2 ;
+   VideoAddrAddr    = ParametersToOS-4 ;
+   OSSizeAddr       = ParametersToOS-6 ;
+   NoOfSectorsAddr  = ParametersToOS-8 ;
+   DebuggingAddr    = ParametersToOS-10 ;
+   StackSizeAddr    = ParametersToOS-12 ;
+
+
+END OSParameters.

@@ -1,0 +1,3 @@
+IMPLEMENTATION MODULE Colours ;
+
+END Colours.

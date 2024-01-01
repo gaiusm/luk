@@ -1,0 +1,57 @@
+DEFINITION MODULE Descriptors ;
+
+(*
+    Title      : Descriptors
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Wed Aug  3 16:14:35 1994
+    Last edit  : Wed Aug  3 16:14:35 1994
+    Description: provides an interface to some assembly language
+                 which sets up the 386/486 gdt and idt.
+                 This does the minumum necessary to allow the 386/486
+                 to access 1Gb
+*)
+
+FROM WordSizes IMPORT SHORTWORD ;
+
+EXPORT QUALIFIED InterruptGate, SetupGDT, SetupIDT, IDT, AfterIDTGDT ;
+
+
+TYPE
+   InterruptGate = RECORD
+                      Offset0To15 : SHORTWORD ;
+                      Segment     : SHORTWORD ;
+                      Flags       : SHORTWORD ;
+                      Offset16To31: SHORTWORD ;
+                   END ;
+
+VAR
+   IDT: ARRAY [0..255] OF InterruptGate ;
+
+
+(*
+   SetupGDT - sets up a global descriptor for the whole of physical
+              memory. It maps 16 Mb of physical memory.
+              It does not touch any extended memory - you must be
+              careful not to touch any physical memory that isn't
+              really there.
+*)
+
+PROCEDURE SetupGDT ;
+
+
+(*
+   SetupIDT - not sure what this does...
+*)
+
+PROCEDURE SetupIDT ;
+
+
+(*
+   AfterIDTGDT - a label which exists at the end of our IDT and GDT tables.
+*)
+
+PROCEDURE AfterIDTGDT ;
+
+
+END Descriptors.

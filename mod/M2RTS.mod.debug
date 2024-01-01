@@ -1,0 +1,137 @@
+IMPLEMENTATION MODULE M2RTS ;
+
+
+FROM SYSTEM IMPORT ADDRESS ;
+FROM Scn IMPORT Write ;
+FROM Descriptors IMPORT SetupGDT, SetupIDT ;
+FROM ASCII IMPORT cr, lf ;
+
+IMPORT Scn ;
+IMPORT osinit ;
+IMPORT StdIO ;
+IMPORT InterruptVector ;
+IMPORT IRQ ;
+IMPORT Storage ;
+IMPORT SYSTEM ;
+IMPORT Exceptions ;
+IMPORT MonStrIO ;
+IMPORT libg ;
+IMPORT gdb ;
+
+
+CONST
+   Max              =    10 ;
+   DebuggingWithGDB =  TRUE ;
+
+VAR
+   Ptr      : CARDINAL ;
+   List     : ARRAY [0..Max] OF PROC ;
+   ExitValue: INTEGER ;
+   CallExit : BOOLEAN ;
+
+
+(*
+   Terminate - calls each installed termination procedure in turn.
+*)
+
+PROCEDURE Terminate ;
+VAR
+   i: CARDINAL ;
+BEGIN
+   i := 0 ;
+   WHILE i<Ptr DO
+      List[i] ;
+      INC(i)
+   END
+END Terminate ;
+
+
+(*
+   HALT - terminate the current program calling creating a core dump.
+          The procedure Terminate is called before the core dump is
+          created.
+*)
+
+PROCEDURE HALT ;
+BEGIN
+   Terminate ;
+   Write('H') ; Write('A') ; Write('L') ; Write('T') ;
+   LOOP END
+END HALT ;
+
+
+(*
+   ExitOnHalt - if HALT is executed then call exit with the exit code, e.
+*)
+
+PROCEDURE ExitOnHalt (e: INTEGER) ;
+BEGIN
+   ExitValue := e ;
+   CallExit := TRUE
+END ExitOnHalt ;
+
+
+(*
+   InstallTerminationProcedure - installs a procedure, p, which will
+                                 be called when the procedure Terminate
+                                 is ionvoked.
+*)
+
+PROCEDURE InstallTerminationProcedure (p: PROC) ;
+BEGIN
+   List[Ptr] := p ;
+   INC(Ptr)
+END InstallTerminationProcedure ;
+
+
+(*
+   Init - initialize this module data structures.
+*)
+
+PROCEDURE Init ;
+BEGIN
+   Ptr := 0 ;
+   ExitValue := 0 ;
+   CallExit := FALSE   (* default by calling abort *)
+END Init ;
+
+
+BEGIN
+   (*
+      it is the job of M2RTS to call each all runtime initialization
+      routines. We need a global initialization routine as the order
+      it critical and we dare not let the statical analysis guess it..
+   *)
+   Init ;          (* M2RTS    initialization *)
+   osinit.Init ;   (* osinit   initialization: RTS mem parameters  *)
+   Scn.Init ;      (* Scn      initialization: screen address      *)
+   Scn.Write('S') ;   Scn.Write('c') ;   Scn.Write('n') ;
+   StdIO.Init ;    (* StdIO    initialization: use Scn.Write       *)
+   Scn.Write('S') ;   Scn.Write('t') ;   Scn.Write('d') ;   Scn.Write('i') ;   Scn.Write('o') ;
+   MonStrIO.Init ; (* MonStrIO initialization: use Scn.Write for debugging *)
+   Scn.Write('M') ;   Scn.Write('o') ;   Scn.Write('n') ;   Scn.Write('S') ;   Scn.Write('t') ;   Scn.Write('r') ;   Scn.Write('I') ;   Scn.Write('O') ;
+
+   SetupIDT ;     (* 386/486 MMU Interrupt descriptor tables     *)
+   Scn.Write('I') ;   Scn.Write('D') ;   Scn.Write('T') ;
+   SetupGDT ;     (* 386/486 MMU Global    descriptor tables     *)
+   Scn.Write('G') ;   Scn.Write('D') ;   Scn.Write('T') ;
+
+   InterruptVector.Init ;    (* Catchall interrupt handlers      *)
+   Scn.Write('i') ;   Scn.Write('n') ;   Scn.Write('t') ;
+   IRQ.Init ;                (* Catchall IRQ specific handlers   *)
+   Scn.Write('I') ;   Scn.Write('R') ;   Scn.Write('Q') ;
+
+   SYSTEM.Init ;  (* SYSTEM  initialization: IOTRANSFER table    *)
+   Scn.Write('S') ;   Scn.Write('Y') ;   Scn.Write('S') ;
+   Storage.Init ; (* Storage initialization: heap management     *)
+
+   Write(cr) ; Write(lf) ;
+   Write('g') ; Write('o') ;
+   Write(cr) ; Write(lf) ;
+   Exceptions.Init ; (* install exception interrupt handlers     *)
+   IF DebuggingWithGDB
+   THEN
+      libg.Init ; (* remove this when not debugging              *)
+      gdb.Init
+   END
+END M2RTS.

@@ -1,0 +1,1426 @@
+BSD Magic:BSD as object code
+cpu         i8086
+flags       20
+cpu         04
+hdrlen      20
+text length 00000CD0  3280
+data length 000000D8   216
+bss  length 00000000     0
+entry (pc)  00000000     0
+total       00010000     0
+syms        00000000     0
+************ setting state *************
+************ setting state *************
+File        : ../second
+
+00000000    8C C8         ..              mov  ax, cs
+00000002    8E D0         ..              mov  ss, ax
+00000004    BC F0 FF      ...             mov  sp, #FFF0
+00000007    B4 03         ..              mov  ah, #03
+00000009    30 FF         0.              xor  bh, bh
+0000000B    CD 10         ..              int  #10
+0000000D    83 F3 07      ...             xor  bx, #07
+00000010    B0 61         .a              mov  al, #61
+00000012    B4 0E         ..              mov  ah, #0E
+00000014    CD 10         ..              int  #10
+00000016    E8 9D 0A      ...             call  0A9D  (00000AB6)
+00000019    B8 62 00      .b.             mov  ax, #0062
+0000001C    50            P               push  ax
+0000001D    E8 74 0A      .t.             call  0A74  (00000A94)
+00000020    58            X               pop  ax
+00000021    E8 E1 04      ...             call  04E1  (00000505)
+00000024    EB FE         ..              jmp  near FE  (00000024)
+00000026    00 00         ..              add  ds:[bx+si], al
+00000028    55            U               push  bp
+00000029    89 E5         ..              mov  bp, sp
+0000002B    83 EC 3E      ..>             sub  sp, #3E
+0000002E    53            S               push  bx
+0000002F    57            W               push  di
+00000030    56            V               push  si
+00000031    89 E8         ..              mov  ax, bp
+00000033    05 04 00      ...             add  ax, #0004
+00000036    89 46 FA      .F.             mov  ss:[bp+FA], ax
+00000039    8B 46 FA      .F.             mov  ax, ss:[bp+FA]
+0000003C    05 02 00      ...             add  ax, #0002
+0000003F    89 46 F8      .F.             mov  ss:[bp+F8], ax
+00000042    8B 7E F8      ...             mov  di, ss:[bp+F8]
+00000045    8B 05         ..              mov  ax, ds:[di]
+00000047    89 46 FC      .F.             mov  ss:[bp+FC], ax
+0000004A    C7 46 FE 00   .F..            mov.w  ss:[bp+no of bytes in operand is inconsistant - program error   2   1
+00FE], #no of bytes in operand is inconsistant - program error   1   2
+00
+0000004E    00            .
+0000004F    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+00000052    8B 56 FC      .V.             mov  dx, ss:[bp+FC]
+00000055    39 D0         9.              cmp  ax, dx
+00000057    7F 03         ..              jg  03  (0000005C)
+00000059    E9 03 00      ...             jmp  near 0003  (0000005F)
+0000005C    E9 71 01      .q.             jmp  near 0171  (000001D0)
+0000005F    89 E8         ..              mov  ax, bp
+00000061    05 04 00      ...             add  ax, #0004
+00000064    89 46 F6      .F.             mov  ss:[bp+F6], ax
+00000067    8B 46 F6      .F.             mov  ax, ss:[bp+F6]
+0000006A    05 00 00      ...             add  ax, #0000
+0000006D    89 46 F4      .F.             mov  ss:[bp+F4], ax
+00000070    8B 7E F4      ...             mov  di, ss:[bp+F4]
+00000073    8B 05         ..              mov  ax, ds:[di]
+00000075    89 46 F2      .F.             mov  ss:[bp+F2], ax
+00000078    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+0000007B    89 46 F0      .F.             mov  ss:[bp+F0], ax
+0000007E    8B 46 F0      .F.             mov  ax, ss:[bp+F0]
+00000081    6B C0 01      k..             imul  ax, 01, al
+00000084    89 46 F0      .F.             mov  ss:[bp+F0], ax
+00000087    8B 46 F2      .F.             mov  ax, ss:[bp+F2]
+0000008A    03 46 F0      .F.             add  ax, ss:[bp+F0]
+0000008D    89 46 EE      .F.             mov  ss:[bp+EE], ax
+00000090    8B 7E EE      ...             mov  di, ss:[bp+EE]
+00000093    8A 05         ..              mov  al, ds:[di]
+00000095    3C 00         <.              cmp  ax, #00
+00000097    74 03         t.              je  03  (0000009C)
+00000099    E9 03 00      ...             jmp  near 0003  (0000009F)
+0000009C    E9 31 01      .1.             jmp  near 0131  (000001D0)
+0000009F    89 E8         ..              mov  ax, bp
+000000A1    05 04 00      ...             add  ax, #0004
+000000A4    89 46 EC      .F.             mov  ss:[bp+EC], ax
+000000A7    8B 46 EC      .F.             mov  ax, ss:[bp+EC]
+000000AA    05 00 00      ...             add  ax, #0000
+000000AD    89 46 EA      .F.             mov  ss:[bp+EA], ax
+000000B0    8B 7E EA      ...             mov  di, ss:[bp+EA]
+000000B3    8B 05         ..              mov  ax, ds:[di]
+000000B5    89 46 E8      .F.             mov  ss:[bp+E8], ax
+000000B8    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+000000BB    89 46 E6      .F.             mov  ss:[bp+E6], ax
+000000BE    8B 46 E6      .F.             mov  ax, ss:[bp+E6]
+000000C1    6B C0 01      k..             imul  ax, 01, al
+000000C4    89 46 E6      .F.             mov  ss:[bp+E6], ax
+000000C7    8B 46 E8      .F.             mov  ax, ss:[bp+E8]
+000000CA    03 46 E6      .F.             add  ax, ss:[bp+E6]
+000000CD    89 46 E4      .F.             mov  ss:[bp+E4], ax
+000000D0    8B 7E E4      ...             mov  di, ss:[bp+E4]
+000000D3    8A 05         ..              mov  al, ds:[di]
+000000D5    3C 5C         <\              cmp  ax, #5C
+000000D7    75 03         u.              jne  03  (000000DC)
+000000D9    E9 03 00      ...             jmp  near 0003  (000000DF)
+000000DC    E9 96 00      ...             jmp  near 0096  (00000175)
+000000DF    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+000000E2    05 01 00      ...             add  ax, #0001
+000000E5    89 46 E2      .F.             mov  ss:[bp+E2], ax
+000000E8    8B 46 E2      .F.             mov  ax, ss:[bp+E2]
+000000EB    8B 56 FC      .V.             mov  dx, ss:[bp+FC]
+000000EE    39 D0         9.              cmp  ax, dx
+000000F0    7F 03         ..              jg  03  (000000F5)
+000000F2    E9 03 00      ...             jmp  near 0003  (000000F8)
+000000F5    E9 7A 00      .z.             jmp  near 007A  (00000172)
+000000F8    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+000000FB    05 01 00      ...             add  ax, #0001
+000000FE    89 46 E0      .F.             mov  ss:[bp+E0], ax
+00000101    89 E8         ..              mov  ax, bp
+00000103    05 04 00      ...             add  ax, #0004
+00000106    89 46 DE      .F.             mov  ss:[bp+DE], ax
+00000109    8B 46 DE      .F.             mov  ax, ss:[bp+DE]
+0000010C    05 00 00      ...             add  ax, #0000
+0000010F    89 46 DC      .F.             mov  ss:[bp+DC], ax
+00000112    8B 7E DC      ...             mov  di, ss:[bp+DC]
+00000115    8B 05         ..              mov  ax, ds:[di]
+00000117    89 46 DA      .F.             mov  ss:[bp+DA], ax
+0000011A    8B 46 E0      .F.             mov  ax, ss:[bp+E0]
+0000011D    89 46 D8      .F.             mov  ss:[bp+D8], ax
+00000120    8B 46 D8      .F.             mov  ax, ss:[bp+D8]
+00000123    6B C0 01      k..             imul  ax, 01, al
+00000126    89 46 D8      .F.             mov  ss:[bp+D8], ax
+00000129    8B 46 DA      .F.             mov  ax, ss:[bp+DA]
+0000012C    03 46 D8      .F.             add  ax, ss:[bp+D8]
+0000012F    89 46 D6      .F.             mov  ss:[bp+D6], ax
+00000132    8B 7E D6      ...             mov  di, ss:[bp+D6]
+00000135    8A 05         ..              mov  al, ds:[di]
+00000137    3C 6E         <n              cmp  ax, #6E
+00000139    75 03         u.              jne  03  (0000013E)
+0000013B    E9 03 00      ...             jmp  near 0003  (00000141)
+0000013E    E9 31 00      .1.             jmp  near 0031  (00000172)
+00000141    83 EC 01      ...             sub  sp, #01
+00000144    89 E7         ..              mov  di, sp
+00000146    C6 05 0A      ...             mov.b  ds:[di], #0A
+00000149    E8 48 09      .H.             call  0948  (00000A94)
+0000014C    83 C4 01      ...             add  sp, #01
+0000014F    83 EC 01      ...             sub  sp, #01
+00000152    89 E7         ..              mov  di, sp
+00000154    C6 05 0D      ...             mov.b  ds:[di], #0D
+00000157    E8 3A 09      .:.             call  093A  (00000A94)
+0000015A    83 C4 01      ...             add  sp, #01
+0000015D    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+00000160    89 46 D4      .F.             mov  ss:[bp+D4], ax
+00000163    8B 46 D4      .F.             mov  ax, ss:[bp+D4]
+00000166    05 01 00      ...             add  ax, #0001
+00000169    89 46 D2      .F.             mov  ss:[bp+D2], ax
+0000016C    8B 46 D2      .F.             mov  ax, ss:[bp+D2]
+0000016F    89 46 FE      .F.             mov  ss:[bp+FE], ax
+00000172    E9 43 00      .C.             jmp  near 0043  (000001B8)
+00000175    89 E8         ..              mov  ax, bp
+00000177    05 04 00      ...             add  ax, #0004
+0000017A    89 46 D0      .F.             mov  ss:[bp+D0], ax
+0000017D    8B 46 D0      .F.             mov  ax, ss:[bp+D0]
+00000180    05 00 00      ...             add  ax, #0000
+00000183    89 46 CE      .F.             mov  ss:[bp+CE], ax
+00000186    8B 7E CE      ...             mov  di, ss:[bp+CE]
+00000189    8B 05         ..              mov  ax, ds:[di]
+0000018B    89 46 CC      .F.             mov  ss:[bp+CC], ax
+0000018E    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+00000191    89 46 CA      .F.             mov  ss:[bp+CA], ax
+00000194    8B 46 CA      .F.             mov  ax, ss:[bp+CA]
+00000197    6B C0 01      k..             imul  ax, 01, al
+0000019A    89 46 CA      .F.             mov  ss:[bp+CA], ax
+0000019D    8B 46 CC      .F.             mov  ax, ss:[bp+CC]
+000001A0    03 46 CA      .F.             add  ax, ss:[bp+CA]
+000001A3    89 46 C8      .F.             mov  ss:[bp+C8], ax
+000001A6    8B 7E C8      ...             mov  di, ss:[bp+C8]
+000001A9    8A 05         ..              mov  al, ds:[di]
+000001AB    83 EC 01      ...             sub  sp, #01
+000001AE    89 E7         ..              mov  di, sp
+000001B0    88 05         ..              mov  ds:[di], al
+000001B2    E8 DF 08      ...             call  08DF  (00000A94)
+000001B5    83 C4 01      ...             add  sp, #01
+000001B8    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+000001BB    89 46 C6      .F.             mov  ss:[bp+C6], ax
+000001BE    8B 46 C6      .F.             mov  ax, ss:[bp+C6]
+000001C1    05 01 00      ...             add  ax, #0001
+000001C4    89 46 C4      .F.             mov  ss:[bp+C4], ax
+000001C7    8B 46 C4      .F.             mov  ax, ss:[bp+C4]
+000001CA    89 46 FE      .F.             mov  ss:[bp+FE], ax
+000001CD    E9 7F FE      ...             jmp  near FE7F  (0000004F)
+000001D0    5E            ^               pop  si
+000001D1    5F            _               pop  di
+000001D2    5B            [               pop  bx
+000001D3    83 C4 3E      ..>             add  sp, #3E
+000001D6    C9            .               leave
+000001D7    C3            .               ret  near
+
+000001D8    55            U               push  bp
+000001D9    89 E5         ..              mov  bp, sp
+000001DB    83 EC 0E      ...             sub  sp, #0E
+000001DE    53            S               push  bx
+000001DF    57            W               push  di
+000001E0    56            V               push  si
+000001E1    E8 90 09      ...             call  0990  (00000B74)
+000001E4    89 46 FE      .F.             mov  ss:[bp+FE], ax
+000001E7    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+000001EA    3D            =
+000001EB    07            .               pop  es
+000001EC    00 75 03      .u.             add  ds:[di+03], dh
+000001EF    E9 03 00      ...             jmp  near 0003  (000001F5)
+000001F2    E9 81 00      ...             jmp  near 0081  (00000276)
+000001F5    89 E8         ..              mov  ax, bp
+000001F7    2D 06 00      -..             sub  ax, #0006
+000001FA    89 46 F8      .F.             mov  ss:[bp+F8], ax
+000001FD    8B 46 F8      .F.             mov  ax, ss:[bp+F8]
+00000200    05 00 00      ...             add  ax, #0000
+00000203    89 46 F6      .F.             mov  ss:[bp+F6], ax
+00000206    89 E3         ..              mov  bx, sp
+00000208    6A 6E         jn              push  #6E
+0000020A    68 74         ht              push  #74
+0000020C    5C            \               pop  sp
+0000020D    68 65         he              push  #65
+0000020F    6E            n
+00000210    68 63         hc              push  #63
+00000212    69 68 66 69   ihfi            imul  bp, 66, ds:[bx+si+69]
+00000216    68 75         hu              push  #75
+00000218    66 68         fh              push  #68
+0000021A    20 73 68       sh             and  ss:[bp+di+68], dh
+0000021D    6F            o
+0000021E    74 68         th              je  68  (00000288)
+00000220    20 6E 68       nh             and  ss:[bp+68], ch
+00000223    69 73 68 6F   isho            imul  si, 68, ss:[bp+di+6F]
+00000227    20 68 64       hd             and  ds:[bx+si+64], ch
+0000022A    65            e               seg gs
+0000022B    68 76         hv              push  #76
+0000022D    69 68 63 20   ihc             imul  bp, 63, ds:[bx+si+20]
+00000231    68 68         hh              push  #68
+00000233    69 68 61 70   ihap            imul  bp, 61, ds:[bx+si+70]
+00000237    68 67         hg              push  #67
+00000239    72 68         rh              jb  68  (000002A3)
+0000023B    6E            n
+0000023C    20 68 4E       hN             and  ds:[bx+si+4E], ch
+0000023F    6F            o
+00000240    8B 7E F6      ...             mov  di, ss:[bp+F6]
+00000243    89 25         .%              mov  ds:[di], sp
+00000245    89 E8         ..              mov  ax, bp
+00000247    2D 06 00      -..             sub  ax, #0006
+0000024A    89 46 F4      .F.             mov  ss:[bp+F4], ax
+0000024D    8B 46 F4      .F.             mov  ax, ss:[bp+F4]
+00000250    05 02 00      ...             add  ax, #0002
+00000253    89 46 F2      .F.             mov  ss:[bp+F2], ax
+00000256    8B 7E F2      ...             mov  di, ss:[bp+F2]
+00000259    C7 05 24 00   ..$.            mov.w  ds:[di], #0024
+0000025D    8B 46 FC      .F.             mov  ax, ss:[bp+FC]
+00000260    50            P               push  ax
+00000261    8B 46 FA      .F.             mov  ax, ss:[bp+FA]
+00000264    50            P               push  ax
+00000265    E8 C0 FD      ...             call  FDC0  (00000028)
+00000268    83 C4 04      ...             add  sp, #04
+0000026B    89 DC         ..              mov  sp, bx
+0000026D    B8 B0 00      ...             mov  ax, #00B0
+00000270    E9 09 00      ...             jmp  near 0009  (0000027C)
+00000273    E9 06 00      ...             jmp  near 0006  (0000027C)
+00000276    B8 B8 00      ...             mov  ax, #00B8
+00000279    E9 00 00      ...             jmp  near 0000  (0000027C)
+0000027C    5E            ^               pop  si
+0000027D    5F            _               pop  di
+0000027E    5B            [               pop  bx
+0000027F    83 C4 0E      ...             add  sp, #0E
+00000282    C9            .               leave
+00000283    C3            .               ret  near
+
+00000284    55            U               push  bp
+00000285    89 E5         ..              mov  bp, sp
+00000287    83 EC 0C      ...             sub  sp, #0C
+0000028A    53            S               push  bx
+0000028B    57            W               push  di
+0000028C    56            V               push  si
+0000028D    89 E8         ..              mov  ax, bp
+0000028F    05 04 00      ...             add  ax, #0004
+00000292    89 46 FE      .F.             mov  ss:[bp+FE], ax
+00000295    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+00000298    05 00 00      ...             add  ax, #0000
+0000029B    89 46 FC      .F.             mov  ss:[bp+FC], ax
+0000029E    8B 7E FC      ...             mov  di, ss:[bp+FC]
+000002A1    8B 05         ..              mov  ax, ds:[di]
+000002A3    89 46 FA      .F.             mov  ss:[bp+FA], ax
+000002A6    8B 46 08      .F.             mov  ax, ss:[bp+08]
+000002A9    89 46 F8      .F.             mov  ss:[bp+F8], ax
+000002AC    8B 46 F8      .F.             mov  ax, ss:[bp+F8]
+000002AF    6B C0 01      k..             imul  ax, 01, al
+000002B2    89 46 F8      .F.             mov  ss:[bp+F8], ax
+000002B5    8B 46 FA      .F.             mov  ax, ss:[bp+FA]
+000002B8    03 46 F8      .F.             add  ax, ss:[bp+F8]
+000002BB    89 46 F6      .F.             mov  ss:[bp+F6], ax
+000002BE    8B 7E F6      ...             mov  di, ss:[bp+F6]
+000002C1    8A 05         ..              mov  al, ds:[di]
+000002C3    83 EC 01      ...             sub  sp, #01
+000002C6    89 E7         ..              mov  di, sp
+000002C8    88 05         ..              mov  ds:[di], al
+000002CA    E8 C7 07      ...             call  07C7  (00000A94)
+000002CD    83 C4 01      ...             add  sp, #01
+000002D0    83 EC 01      ...             sub  sp, #01
+000002D3    89 E7         ..              mov  di, sp
+000002D5    C6 05 08      ...             mov.b  ds:[di], #08
+000002D8    E8 B9 07      ...             call  07B9  (00000A94)
+000002DB    83 C4 01      ...             add  sp, #01
+000002DE    5E            ^               pop  si
+000002DF    5F            _               pop  di
+000002E0    5B            [               pop  bx
+000002E1    83 C4 0C      ...             add  sp, #0C
+000002E4    C9            .               leave
+000002E5    C3            .               ret  near
+
+000002E6    55            U               push  bp
+000002E7    89 E5         ..              mov  bp, sp
+000002E9    53            S               push  bx
+000002EA    57            W               push  di
+000002EB    56            V               push  si
+000002EC    6A 0A         j.              push  #0A
+000002EE    8B 46 06      .F.             mov  ax, ss:[bp+06]
+000002F1    50            P               push  ax
+000002F2    8B 46 04      .F.             mov  ax, ss:[bp+04]
+000002F5    50            P               push  ax
+000002F6    E8 08 00      ...             call  0008  (00000301)
+000002F9    83 C4 06      ...             add  sp, #06
+000002FC    5E            ^               pop  si
+000002FD    5F            _               pop  di
+000002FE    5B            [               pop  bx
+000002FF    C9            .               leave
+00000300    C3            .               ret  near
+
+00000301    55            U               push  bp
+00000302    89 E5         ..              mov  bp, sp
+00000304    83 EC 4A      ..J             sub  sp, #4A
+00000307    53            S               push  bx
+00000308    57            W               push  di
+00000309    56            V               push  si
+0000030A    C7 46 EA 00   .F..            mov.w  ss:[bp+no of bytes in operand is inconsistant - program error   2   1
+00EA], #no of bytes in operand is inconsistant - program error   1   2
+00
+0000030E    00            .
+0000030F    8B 46 04      .F.             mov  ax, ss:[bp+04]
+00000312    3D            =
+00000313    00 00         ..              add  ds:[bx+si], al
+00000315    74 03         t.              je  03  (0000031A)
+00000317    E9 03 00      ...             jmp  near 0003  (0000031D)
+0000031A    E9 79 00      .y.             jmp  near 0079  (00000396)
+0000031D    8B 46 04      .F.             mov  ax, ss:[bp+04]
+00000320    3D            =
+00000321    00 00         ..              add  ds:[bx+si], al
+00000323    74 03         t.              je  03  (00000328)
+00000325    E9 03 00      ...             jmp  near 0003  (0000032B)
+00000328    E9 68 00      .h.             jmp  near 0068  (00000393)
+0000032B    89 E8         ..              mov  ax, bp
+0000032D    2D 14 00      -..             sub  ax, #0014
+00000330    05 00 00      ...             add  ax, #0000
+00000333    89 46 E6      .F.             mov  ss:[bp+E6], ax
+00000336    8B 46 EA      .F.             mov  ax, ss:[bp+EA]
+00000339    89 46 E4      .F.             mov  ss:[bp+E4], ax
+0000033C    8B 46 E4      .F.             mov  ax, ss:[bp+E4]
+0000033F    6B C0 02      k..             imul  ax, 02, al
+00000342    89 46 E2      .F.             mov  ss:[bp+E2], ax
+00000345    B8 00 00      ...             mov  ax, #0000
+00000348    03 46 E2      .F.             add  ax, ss:[bp+E2]
+0000034B    89 46 E0      .F.             mov  ss:[bp+E0], ax
+0000034E    8B 46 E6      .F.             mov  ax, ss:[bp+E6]
+00000351    03 46 E0      .F.             add  ax, ss:[bp+E0]
+00000354    89 46 DE      .F.             mov  ss:[bp+DE], ax
+00000357    8B 46 04      .F.             mov  ax, ss:[bp+04]
+0000035A    66 99         f.
+0000035C    F7 7E 08      ...             idiv  ax, ss:[bp+08]
+0000035F    08            .
+0000035F    89 56 DC      .V.             mov  ss:[bp+DC], dx
+00000362    8B 46 DC      .F.             mov  ax, ss:[bp+DC]
+00000365    8B 7E DE      ...             mov  di, ss:[bp+DE]
+00000368    89 05         ..              mov  ds:[di], ax
+0000036A    8B 46 04      .F.             mov  ax, ss:[bp+04]
+0000036D    66 99         f.
+0000036F    F7 7E 08      ...             idiv  ax, ss:[bp+08]
+00000372    08            .
+00000372    89 46 DA      .F.             mov  ss:[bp+DA], ax
+00000375    8B 46 DA      .F.             mov  ax, ss:[bp+DA]
+00000378    89 46 04      .F.             mov  ss:[bp+04], ax
+0000037B    8B 46 EA      .F.             mov  ax, ss:[bp+EA]
+0000037E    89 46 D8      .F.             mov  ss:[bp+D8], ax
+00000381    8B 46 D8      .F.             mov  ax, ss:[bp+D8]
+00000384    05 01 00      ...             add  ax, #0001
+00000387    89 46 D6      .F.             mov  ss:[bp+D6], ax
+0000038A    8B 46 D6      .F.             mov  ax, ss:[bp+D6]
+0000038D    89 46 EA      .F.             mov  ss:[bp+EA], ax
+00000390    E9 8A FF      ...             jmp  near FF8A  (0000031D)
+00000393    E9 48 00      .H.             jmp  near 0048  (000003DE)
+00000396    89 E8         ..              mov  ax, bp
+00000398    2D 14 00      -..             sub  ax, #0014
+0000039B    05 00 00      ...             add  ax, #0000
+0000039E    89 46 D4      .F.             mov  ss:[bp+D4], ax
+000003A1    8B 46 EA      .F.             mov  ax, ss:[bp+EA]
+000003A4    89 46 D2      .F.             mov  ss:[bp+D2], ax
+000003A7    8B 46 D2      .F.             mov  ax, ss:[bp+D2]
+000003AA    6B C0 02      k..             imul  ax, 02, al
+000003AD    89 46 D0      .F.             mov  ss:[bp+D0], ax
+000003B0    B8 00 00      ...             mov  ax, #0000
+000003B3    03 46 D0      .F.             add  ax, ss:[bp+D0]
+000003B6    89 46 CE      .F.             mov  ss:[bp+CE], ax
+000003B9    8B 46 D4      .F.             mov  ax, ss:[bp+D4]
+000003BC    03 46 CE      .F.             add  ax, ss:[bp+CE]
+000003BF    89 46 CC      .F.             mov  ss:[bp+CC], ax
+000003C2    8B 7E CC      ...             mov  di, ss:[bp+CC]
+000003C5    C7 05 00 00   ....            mov.w  ds:[di], #0000
+000003C9    8B 46 EA      .F.             mov  ax, ss:[bp+EA]
+000003CC    89 46 CA      .F.             mov  ss:[bp+CA], ax
+000003CF    8B 46 CA      .F.             mov  ax, ss:[bp+CA]
+000003D2    05 01 00      ...             add  ax, #0001
+000003D5    89 46 C8      .F.             mov  ss:[bp+C8], ax
+000003D8    8B 46 C8      .F.             mov  ax, ss:[bp+C8]
+000003DB    89 46 EA      .F.             mov  ss:[bp+EA], ax
+000003DE    8B 46 06      .F.             mov  ax, ss:[bp+06]
+000003E1    8B 56 EA      .V.             mov  dx, ss:[bp+EA]
+000003E4    39 D0         9.              cmp  ax, dx
+000003E6    7F 03         ..              jg  03  (000003EB)
+000003E8    E9 26 00      .&.             jmp  near 0026  (00000411)
+000003EB    83 EC 01      ...             sub  sp, #01
+000003EE    89 E7         ..              mov  di, sp
+000003F0    C6 05 20      ..              mov.b  ds:[di], #20
+000003F3    E8 9E 06      ...             call  069E  (00000A94)
+000003F6    83 C4 01      ...             add  sp, #01
+000003F9    8B 46 06      .F.             mov  ax, ss:[bp+06]
+000003FC    89 46 C6      .F.             mov  ss:[bp+C6], ax
+000003FF    8B 46 C6      .F.             mov  ax, ss:[bp+C6]
+00000402    2D 01 00      -..             sub  ax, #0001
+00000405    89 46 C4      .F.             mov  ss:[bp+C4], ax
+00000408    8B 46 C4      .F.             mov  ax, ss:[bp+C4]
+0000040B    89 46 06      .F.             mov  ss:[bp+06], ax
+0000040E    E9 CD FF      ...             jmp  near FFCD  (000003DE)
+00000411    8B 46 EA      .F.             mov  ax, ss:[bp+EA]
+00000414    3D            =
+00000415    00 00         ..              add  ds:[bx+si], al
+00000417    7E 03         ..              jle  03  (0000041C)
+00000419    E9 03 00      ...             jmp  near 0003  (0000041F)
+0000041C    E9 50 00      .P.             jmp  near 0050  (0000046F)
+0000041F    8B 46 EA      .F.             mov  ax, ss:[bp+EA]
+00000422    89 46 C2      .F.             mov  ss:[bp+C2], ax
+00000425    8B 46 C2      .F.             mov  ax, ss:[bp+C2]
+00000428    2D 01 00      -..             sub  ax, #0001
+0000042B    89 46 C0      .F.             mov  ss:[bp+C0], ax
+0000042E    8B 46 C0      .F.             mov  ax, ss:[bp+C0]
+00000431    89 46 EA      .F.             mov  ss:[bp+EA], ax
+00000434    89 E8         ..              mov  ax, bp
+00000436    2D 14 00      -..             sub  ax, #0014
+00000439    05 00 00      ...             add  ax, #0000
+0000043C    89 46 BE      .F.             mov  ss:[bp+BE], ax
+0000043F    8B 46 EA      .F.             mov  ax, ss:[bp+EA]
+00000442    89 46 BC      .F.             mov  ss:[bp+BC], ax
+00000445    8B 46 BC      .F.             mov  ax, ss:[bp+BC]
+00000448    6B C0 02      k..             imul  ax, 02, al
+0000044B    89 46 BA      .F.             mov  ss:[bp+BA], ax
+0000044E    B8 00 00      ...             mov  ax, #0000
+00000451    03 46 BA      .F.             add  ax, ss:[bp+BA]
+00000454    89 46 B8      .F.             mov  ss:[bp+B8], ax
+00000457    8B 46 BE      .F.             mov  ax, ss:[bp+BE]
+0000045A    03 46 B8      .F.             add  ax, ss:[bp+B8]
+0000045D    89 46 B6      .F.             mov  ss:[bp+B6], ax
+00000460    8B 7E B6      ...             mov  di, ss:[bp+B6]
+00000463    8B 05         ..              mov  ax, ds:[di]
+00000465    50            P               push  ax
+00000466    E8 29 00      .).             call  0029  (00000492)
+00000469    83 C4 02      ...             add  sp, #02
+0000046C    E9 A2 FF      ...             jmp  near FFA2  (00000411)
+0000046F    5E            ^               pop  si
+00000470    5F            _               pop  di
+00000471    5B            [               pop  bx
+00000472    83 C4 4A      ..J             add  sp, #4A
+00000475    C9            .               leave
+00000476    C3            .               ret  near
+
+00000477    55            U               push  bp
+00000478    89 E5         ..              mov  bp, sp
+0000047A    53            S               push  bx
+0000047B    57            W               push  di
+0000047C    56            V               push  si
+0000047D    6A 10         j.              push  #10
+0000047F    8B 46 06      .F.             mov  ax, ss:[bp+06]
+00000482    50            P               push  ax
+00000483    8B 46 04      .F.             mov  ax, ss:[bp+04]
+00000486    50            P               push  ax
+00000487    E8 77 FE      .w.             call  FE77  (00000301)
+0000048A    83 C4 06      ...             add  sp, #06
+0000048D    5E            ^               pop  si
+0000048E    5F            _               pop  di
+0000048F    5B            [               pop  bx
+00000490    C9            .               leave
+00000491    C3            .               ret  near
+
+00000492    55            U               push  bp
+00000493    89 E5         ..              mov  bp, sp
+00000495    83 EC 0D      ...             sub  sp, #0D
+00000498    53            S               push  bx
+00000499    57            W               push  di
+0000049A    56            V               push  si
+0000049B    8B 46 04      .F.             mov  ax, ss:[bp+04]
+0000049E    3D            =
+0000049F    09 00         ..              or  ds:[bx+di], ax
+000004A1    7E 03         ..              jle  03  (000004A6)
+000004A3    E9 03 00      ...             jmp  near 0003  (000004A9)
+000004A6    E9 30 00      .0.             jmp  near 0030  (000004D9)
+000004A9    8B 46 04      .F.             mov  ax, ss:[bp+04]
+000004AC    2D 0A 00      -..             sub  ax, #000A
+000004AF    89 46 FE      .F.             mov  ss:[bp+FE], ax
+000004B2    C7 46 FC 61   .F.a            mov.w  ss:[bp+no of bytes in operand is inconsistant - program error   2   1
+61FC], #no of bytes in operand is inconsistant - program error   1   2
+61
+000004B6    00            .
+000004B7    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+000004BA    03 46 FC      .F.             add  ax, ss:[bp+FC]
+000004BD    89 46 FA      .F.             mov  ss:[bp+FA], ax
+000004C0    8B 46 FA      .F.             mov  ax, ss:[bp+FA]
+000004C3    88 46 F9      .F.             mov  ss:[bp+F9], al
+000004C6    8A 46 F9      .F.             mov  al, ss:[bp+F9]
+000004C9    83 EC 01      ...             sub  sp, #01
+000004CC    89 E7         ..              mov  di, sp
+000004CE    88 05         ..              mov  ds:[di], al
+000004D0    E8 C1 05      ...             call  05C1  (00000A94)
+000004D3    83 C4 01      ...             add  sp, #01
+000004D6    E9 24 00      .$.             jmp  near 0024  (000004FD)
+000004D9    C7 46 F7 30   .F.0            mov.w  ss:[bp+no of bytes in operand is inconsistant - program error   2   1
+30F7], #no of bytes in operand is inconsistant - program error   1   2
+30
+000004DD    00            .
+000004DE    8B 46 04      .F.             mov  ax, ss:[bp+04]
+000004E1    03 46 F7      .F.             add  ax, ss:[bp+F7]
+000004E4    89 46 F5      .F.             mov  ss:[bp+F5], ax
+000004E7    8B 46 F5      .F.             mov  ax, ss:[bp+F5]
+000004EA    88 46 F4      .F.             mov  ss:[bp+F4], al
+000004ED    8A 46 F4      .F.             mov  al, ss:[bp+F4]
+000004F0    83 EC 01      ...             sub  sp, #01
+000004F3    89 E7         ..              mov  di, sp
+000004F5    88 05         ..              mov  ds:[di], al
+000004F7    E8 9A 05      ...             call  059A  (00000A94)
+000004FA    83 C4 01      ...             add  sp, #01
+000004FD    5E            ^               pop  si
+000004FE    5F            _               pop  di
+000004FF    5B            [               pop  bx
+00000500    83 C4 0D      ...             add  sp, #0D
+00000503    C9            .               leave
+00000504    C3            .               ret  near
+
+00000505    55            U               push  bp
+00000506    89 E5         ..              mov  bp, sp
+00000508    53            S               push  bx
+00000509    57            W               push  di
+0000050A    56            V               push  si
+0000050B    C7 06 08 00   ....            mov.w  ds:0008, #0004
+0000050F    04 00         ..
+00000511    A1 08 00      ...             mov  ax, 0008
+00000514    05 00 00      ...             add  ax, #0000
+00000517    A3 0A 00      ...             mov  000A, ax
+0000051A    89 E3         ..              mov  bx, sp
+0000051C    6A 6E         jn              push  #6E
+0000051E    68 64         hd              push  #64
+00000520    5C            \               pop  sp
+00000521    68 74         ht              push  #74
+00000523    65            e               seg gs
+00000524    68 76         hv              push  #76
+00000526    61            a               popall
+00000527    68 74         ht              push  #74
+00000529    69 68 61 63   ihac            imul  bp, 61, ds:[bx+si+63]
+0000052D    68 74         ht              push  #74
+0000052F    20 68 6F       ho             and  ds:[bx+si+6F], ch
+00000532    6F            o
+00000533    68 20         h               push  #20
+00000535    62            b
+00000536    68 72         hr              push  #72
+00000538    79 68         yh              jns  68  (000005A2)
+0000053A    64            d               seg fs
+0000053B    61            a               popall
+0000053C    68 6F         ho              push  #6F
+0000053E    6E            n
+0000053F    68 65         he              push  #65
+00000541    63 68 20      ch              arpl  bp, ds:[bx+si+20]
+00000544    73 68         sh              jnb  68  (000005AE)
+00000546    65            e               seg gs
+00000547    6D            m
+00000548    68 73         hs              push  #73
+0000054A    74 68         th              je  68  (000005B4)
+0000054C    73 79         sy              jnb  79  (000005C7)
+0000054E    68 65         he              push  #65
+00000550    20 68 69       hi             and  ds:[bx+si+69], ch
+00000553    6D            m
+00000554    68 20         h               push  #20
+00000556    74 68         th              je  68  (000005C0)
+00000558    61            a               popall
+00000559    6C            l
+0000055A    68 52         hR              push  #52
+0000055C    65            e               seg gs
+0000055D    68 5C         h\              push  #5C
+0000055F    6E            n
+00000560    8B 3E 0A 00   .>..            mov  di, ds:000A
+00000564    00            .
+00000564    89 25         .%              mov  ds:[di], sp
+00000566    C7 06 0C 00   ....            mov.w  ds:000C, #0004
+0000056A    04 00         ..
+0000056C    A1 0C 00      ...             mov  ax, 000C
+0000056F    05 02 00      ...             add  ax, #0002
+00000572    A3 0E 00      ...             mov  000E, ax
+00000575    8B 3E 0E 00   .>..            mov  di, ds:000E
+00000579    C7 05 2C 00   ..,.            mov.w  ds:[di], #002C
+0000057D    A1 06 00      ...             mov  ax, 0006
+00000580    50            P               push  ax
+00000581    A1 04 00      ...             mov  ax, 0004
+00000584    50            P               push  ax
+00000585    E8 A0 FA      ...             call  FAA0  (00000028)
+00000588    83 C4 04      ...             add  sp, #04
+0000058B    89 DC         ..              mov  sp, bx
+0000058D    C7 06 14 00   ....            mov.w  ds:0014, #0010
+00000591    10 00         ..
+00000593    A1 14 00      ...             mov  ax, 0014
+00000596    05 00 00      ...             add  ax, #0000
+00000599    A3 16 00      ...             mov  0016, ax
+0000059C    89 E3         ..              mov  bx, sp
+0000059E    83 EC 01      ...             sub  sp, #01
+000005A1    89 E7         ..              mov  di, sp
+000005A3    C7 05 00 00   ....            mov.w  ds:[di], #0000
+000005A7    68 5C         h\              push  #5C
+000005A9    6E            n
+000005AA    68 65         he              push  #65
+000005AC    6D            m
+000005AD    68 73         hs              push  #73
+000005AF    74 68         th              je  68  (00000619)
+000005B1    53            S               push  bx
+000005B2    79 68         yh              jns  68  (0000061C)
+000005B4    67 20 68      g h             and  ds:[bx+si+68], ch
+000005B7    69 6E 68 61   inha            imul  bp, 68, ss:[bp+61]
+000005BB    74 68         th              je  68  (00000625)
+000005BD    65            e               seg gs
+000005BE    72 68         rh              jb  68  (00000628)
+000005C0    4F            O               dec  di
+000005C1    70 68         ph              jo  68  (0000062B)
+000005C3    67 20 68      g h             and  ds:[bx+si+68], ch
+000005C6    69 6E 68 6F   inho            imul  bp, 68, ss:[bp+6F]
+000005CA    74 68         th              je  68  (00000634)
+000005CC    42            B               inc  dx
+000005CD    6F            o
+000005CE    68 5C         h\              push  #5C
+000005D0    6E            n
+000005D1    8B 3E 16 00   .>..            mov  di, ds:0016
+000005D5    00            .
+000005D5    89 25         .%              mov  ds:[di], sp
+000005D7    C7 06 18 00   ....            mov.w  ds:0018, #0010
+000005DB    10 00         ..
+000005DD    A1 18 00      ...             mov  ax, 0018
+000005E0    05 02 00      ...             add  ax, #0002
+000005E3    A3 1A 00      ...             mov  001A, ax
+000005E6    8B 3E 1A 00   .>..            mov  di, ds:001A
+000005EA    C7 05 1B 00   ....            mov.w  ds:[di], #001B
+000005EE    A1 12 00      ...             mov  ax, 0012
+000005F1    50            P               push  ax
+000005F2    A1 10 00      ...             mov  ax, 0010
+000005F5    50            P               push  ax
+000005F6    E8 2F FA      ./.             call  FA2F  (00000028)
+000005F9    83 C4 04      ...             add  sp, #04
+000005FC    89 DC         ..              mov  sp, bx
+000005FE    C7 06 20 00   .. .            mov.w  ds:0020, #001C
+00000602    1C 00         ..
+00000604    A1 20 00      . .             mov  ax, 0020
+00000607    05 00 00      ...             add  ax, #0000
+0000060A    A3 22 00      .".             mov  0022, ax
+0000060D    89 E3         ..              mov  bx, sp
+0000060F    6A 3D         j=              push  #3D
+00000611    68 20         h               push  #20
+00000613    20 68 20       h              and  ds:[bx+si+20], ch
+00000616    20 68 20       h              and  ds:[bx+si+20], ch
+00000619    20 68 20       h              and  ds:[bx+si+20], ch
+0000061C    20 68 20       h              and  ds:[bx+si+20], ch
+0000061F    20 68 7A       hz             and  ds:[bx+si+7A], ch
+00000622    65            e               seg gs
+00000623    68 53         hS              push  #53
+00000625    69 68 4F 53   ihOS            imul  bp, 4F, ds:[bx+si+53]
+00000629    68 5C         h\              push  #5C
+0000062B    6E            n
+0000062C    8B 3E 22 00   .>".            mov  di, ds:0022
+00000630    00            .
+00000630    89 25         .%              mov  ds:[di], sp
+00000632    C7 06 24 00   ..$.            mov.w  ds:0024, #001C
+00000636    1C 00         ..
+00000638    A1 24 00      .$.             mov  ax, 0024
+0000063B    05 02 00      ...             add  ax, #0002
+0000063E    A3 26 00      .&.             mov  0026, ax
+00000641    8B 3E 26 00   .>&.            mov  di, ds:0026
+00000645    C7 05 12 00   ....            mov.w  ds:[di], #0012
+00000649    A1 1E 00      ...             mov  ax, 001E
+0000064C    50            P               push  ax
+0000064D    A1 1C 00      ...             mov  ax, 001C
+00000650    50            P               push  ax
+00000651    E8 D4 F9      ...             call  F9D4  (00000028)
+00000654    83 C4 04      ...             add  sp, #04
+00000657    89 DC         ..              mov  sp, bx
+00000659    6A 08         j.              push  #08
+0000065B    A1 B4 00      ...             mov  ax, 00B4
+0000065E    50            P               push  ax
+0000065F    E8 15 FE      ...             call  FE15  (00000477)
+00000662    83 C4 04      ...             add  sp, #04
+00000665    C7 06 2C 00   ..,.            mov.w  ds:002C, #0028
+00000669    28 00         (.
+0000066B    A1 2C 00      .,.             mov  ax, 002C
+0000066E    05 00 00      ...             add  ax, #0000
+00000671    A3 2E 00      ...             mov  002E, ax
+00000674    89 E3         ..              mov  bx, sp
+00000676    6A 3D         j=              push  #3D
+00000678    68 20         h               push  #20
+0000067A    20 68 20       h              and  ds:[bx+si+20], ch
+0000067D    20 68 20       h              and  ds:[bx+si+20], ch
+00000680    20 68 20       h              and  ds:[bx+si+20], ch
+00000683    20 68 74       ht             and  ds:[bx+si+74], ch
+00000686    20 68 61       ha             and  ds:[bx+si+61], ch
+00000689    72 68         rh              jb  68  (000006F3)
+0000068B    53            S               push  bx
+0000068C    74 68         th              je  68  (000006F6)
+0000068E    4F            O               dec  di
+0000068F    53            S               push  bx
+00000690    68 5C         h\              push  #5C
+00000692    6E            n
+00000693    8B 3E 2E 00   .>..            mov  di, ds:002E
+00000697    00            .
+00000697    89 25         .%              mov  ds:[di], sp
+00000699    C7 06 30 00   ..0.            mov.w  ds:0030, #0028
+0000069D    28 00         (.
+0000069F    A1 30 00      .0.             mov  ax, 0030
+000006A2    05 02 00      ...             add  ax, #0002
+000006A5    A3 32 00      .2.             mov  0032, ax
+000006A8    8B 3E 32 00   .>2.            mov  di, ds:0032
+000006AC    C7 05 12 00   ....            mov.w  ds:[di], #0012
+000006B0    A1 2A 00      .*.             mov  ax, 002A
+000006B3    50            P               push  ax
+000006B4    A1 28 00      .(.             mov  ax, 0028
+000006B7    50            P               push  ax
+000006B8    E8 6D F9      .m.             call  F96D  (00000028)
+000006BB    83 C4 04      ...             add  sp, #04
+000006BE    89 DC         ..              mov  sp, bx
+000006C0    6A 08         j.              push  #08
+000006C2    A1 B6 00      ...             mov  ax, 00B6
+000006C5    50            P               push  ax
+000006C6    E8 AE FD      ...             call  FDAE  (00000477)
+000006C9    83 C4 04      ...             add  sp, #04
+000006CC    C7 06 38 00   ..8.            mov.w  ds:0038, #0034
+000006D0    34 00         4.
+000006D2    A1 38 00      .8.             mov  ax, 0038
+000006D5    05 00 00      ...             add  ax, #0000
+000006D8    A3 3A 00      .:.             mov  003A, ax
+000006DB    89 E3         ..              mov  bx, sp
+000006DD    6A 3D         j=              push  #3D
+000006DF    68 20         h               push  #20
+000006E1    20 68 20       h              and  ds:[bx+si+20], ch
+000006E4    20 68 20       h              and  ds:[bx+si+20], ch
+000006E7    20 68 7A       hz             and  ds:[bx+si+7A], ch
+000006EA    65            e               seg gs
+000006EB    68 53         hS              push  #53
+000006ED    69 68 6E 64   ihnd            imul  bp, 6E, ds:[bx+si+64]
+000006F1    68 63         hc              push  #63
+000006F3    6F            o
+000006F4    68 53         hS              push  #53
+000006F6    65            e               seg gs
+000006F7    68 5C         h\              push  #5C
+000006F9    6E            n
+000006FA    8B 3E 3A 00   .>:.            mov  di, ds:003A
+000006FE    00            .
+000006FE    89 25         .%              mov  ds:[di], sp
+00000700    C7 06 3C 00   ..<.            mov.w  ds:003C, #0034
+00000704    34 00         4.
+00000706    A1 3C 00      .<.             mov  ax, 003C
+00000709    05 02 00      ...             add  ax, #0002
+0000070C    A3 3E 00      .>.             mov  003E, ax
+0000070F    8B 3E 3E 00   .>>.            mov  di, ds:003E
+00000713    C7 05 12 00   ....            mov.w  ds:[di], #0012
+00000717    A1 36 00      .6.             mov  ax, 0036
+0000071A    50            P               push  ax
+0000071B    A1 34 00      .4.             mov  ax, 0034
+0000071E    50            P               push  ax
+0000071F    E8 06 F9      ...             call  F906  (00000028)
+00000722    83 C4 04      ...             add  sp, #04
+00000725    89 DC         ..              mov  sp, bx
+00000727    6A 08         j.              push  #08
+00000729    A1 B8 00      ...             mov  ax, 00B8
+0000072C    50            P               push  ax
+0000072D    E8 47 FD      .G.             call  FD47  (00000477)
+00000730    83 C4 04      ...             add  sp, #04
+00000733    C7 06 44 00   ..D.            mov.w  ds:0044, #0040
+00000737    40 00         @.
+00000739    A1 44 00      .D.             mov  ax, 0044
+0000073C    05 00 00      ...             add  ax, #0000
+0000073F    A3 46 00      .F.             mov  0046, ax
+00000742    89 E3         ..              mov  bx, sp
+00000744    6A 3D         j=              push  #3D
+00000746    68 20         h               push  #20
+00000748    20 68 20       h              and  ds:[bx+si+20], ch
+0000074B    20 68 20       h              and  ds:[bx+si+20], ch
+0000074E    20 68 74       ht             and  ds:[bx+si+74], ch
+00000751    61            a               popall
+00000752    68 44         hD              push  #44
+00000754    61            a               popall
+00000755    68 6E         hn              push  #6E
+00000757    64            d               seg fs
+00000758    68 63         hc              push  #63
+0000075A    6F            o
+0000075B    68 53         hS              push  #53
+0000075D    65            e               seg gs
+0000075E    68 5C         h\              push  #5C
+00000760    6E            n
+00000761    8B 3E 46 00   .>F.            mov  di, ds:0046
+00000765    00            .
+00000765    89 25         .%              mov  ds:[di], sp
+00000767    C7 06 48 00   ..H.            mov.w  ds:0048, #0040
+0000076B    40 00         @.
+0000076D    A1 48 00      .H.             mov  ax, 0048
+00000770    05 02 00      ...             add  ax, #0002
+00000773    A3 4A 00      .J.             mov  004A, ax
+00000776    8B 3E 4A 00   .>J.            mov  di, ds:004A
+0000077A    C7 05 12 00   ....            mov.w  ds:[di], #0012
+0000077E    A1 42 00      .B.             mov  ax, 0042
+00000781    50            P               push  ax
+00000782    A1 40 00      .@.             mov  ax, 0040
+00000785    50            P               push  ax
+00000786    E8 9F F8      ...             call  F89F  (00000028)
+00000789    83 C4 04      ...             add  sp, #04
+0000078C    89 DC         ..              mov  sp, bx
+0000078E    6A 08         j.              push  #08
+00000790    A1 BA 00      ...             mov  ax, 00BA
+00000793    50            P               push  ax
+00000794    E8 E0 FC      ...             call  FCE0  (00000477)
+00000797    83 C4 04      ...             add  sp, #04
+0000079A    C7 06 50 00   ..P.            mov.w  ds:0050, #004C
+0000079E    4C 00         L.
+000007A0    A1 50 00      .P.             mov  ax, 0050
+000007A3    05 00 00      ...             add  ax, #0000
+000007A6    A3 52 00      .R.             mov  0052, ax
+000007A9    89 E3         ..              mov  bx, sp
+000007AB    83 EC 01      ...             sub  sp, #01
+000007AE    89 E7         ..              mov  di, sp
+000007B0    C7 05 00 00   ....            mov.w  ds:[di], #0000
+000007B4    68 5C         h\              push  #5C
+000007B6    6E            n
+000007B7    8B 3E 52 00   .>R.            mov  di, ds:0052
+000007BB    00            .
+000007BB    89 25         .%              mov  ds:[di], sp
+000007BD    C7 06 54 00   ..T.            mov.w  ds:0054, #004C
+000007C1    4C 00         L.
+000007C3    A1 54 00      .T.             mov  ax, 0054
+000007C6    05 02 00      ...             add  ax, #0002
+000007C9    A3 56 00      .V.             mov  0056, ax
+000007CC    8B 3E 56 00   .>V.            mov  di, ds:0056
+000007D0    C7 05 01 00   ....            mov.w  ds:[di], #0001
+000007D4    A1 4E 00      .N.             mov  ax, 004E
+000007D7    50            P               push  ax
+000007D8    A1 4C 00      .L.             mov  ax, 004C
+000007DB    50            P               push  ax
+000007DC    E8 49 F8      .I.             call  F849  (00000028)
+000007DF    83 C4 04      ...             add  sp, #04
+000007E2    89 DC         ..              mov  sp, bx
+000007E4    C7 06 5C 00   ..\.            mov.w  ds:005C, #0058
+000007E8    58 00         X.
+000007EA    A1 5C 00      .\.             mov  ax, 005C
+000007ED    05 00 00      ...             add  ax, #0000
+000007F0    A3 5E 00      .^.             mov  005E, ax
+000007F3    89 E3         ..              mov  bx, sp
+000007F5    6A 3D         j=              push  #3D
+000007F7    68 79         hy              push  #79
+000007F9    20 68 6F       ho             and  ds:[bx+si+6F], ch
+000007FC    72 68         rh              jb  68  (00000866)
+000007FE    65            e               seg gs
+000007FF    6D            m
+00000800    68 20         h               push  #20
+00000802    6D            m
+00000803    68 65         he              push  #65
+00000805    64            d               seg fs
+00000806    68 6E         hn              push  #6E
+00000808    64            d               seg fs
+00000809    68 74         ht              push  #74
+0000080B    65            e               seg gs
+0000080C    68 45         hE              push  #45
+0000080E    78 68         xh              js  68  (00000878)
+00000810    5C            \               pop  sp
+00000811    6E            n
+00000812    8B 3E 5E 00   .>^.            mov  di, ds:005E
+00000816    00            .
+00000816    89 25         .%              mov  ds:[di], sp
+00000818    C7 06 60 00   ..`.            mov.w  ds:0060, #0058
+0000081C    58 00         X.
+0000081E    A1 60 00      .`.             mov  ax, 0060
+00000821    05 02 00      ...             add  ax, #0002
+00000824    A3 62 00      .b.             mov  0062, ax
+00000827    8B 3E 62 00   .>b.            mov  di, ds:0062
+0000082B    C7 05 12 00   ....            mov.w  ds:[di], #0012
+0000082F    A1 5A 00      .Z.             mov  ax, 005A
+00000832    50            P               push  ax
+00000833    A1 58 00      .X.             mov  ax, 0058
+00000836    50            P               push  ax
+00000837    E8 EE F7      ...             call  F7EE  (00000028)
+0000083A    83 C4 04      ...             add  sp, #04
+0000083D    89 DC         ..              mov  sp, bx
+0000083F    E8 B6 02      ...             call  02B6  (00000AF8)
+00000842    A3 64 00      .d.             mov  0064, ax
+00000845    6A 04         j.              push  #04
+00000847    A1 64 00      .d.             mov  ax, 0064
+0000084A    50            P               push  ax
+0000084B    E8 98 FA      ...             call  FA98  (000002E6)
+0000084E    83 C4 04      ...             add  sp, #04
+00000851    C7 06 6A 00   ..j.            mov.w  ds:006A, #0066
+00000855    66 00         f.
+00000857    A1 6A 00      .j.             mov  ax, 006A
+0000085A    05 00 00      ...             add  ax, #0000
+0000085D    A3 6C 00      .l.             mov  006C, ax
+00000860    89 E3         ..              mov  bx, sp
+00000862    83 EC 01      ...             sub  sp, #01
+00000865    89 E7         ..              mov  di, sp
+00000867    C7 05 00 00   ....            mov.w  ds:[di], #0000
+0000086B    68 5C         h\              push  #5C
+0000086D    6E            n
+0000086E    68 20         h               push  #20
+00000870    6B 8B 3E 6C   k.>l            imul  cx, 3E, ss:[bp+di+006C]
+00000874    00            .
+00000875    89 25         .%              mov  ds:[di], sp
+00000877    C7 06 6E 00   ..n.            mov.w  ds:006E, #0066
+0000087B    66 00         f.
+0000087D    A1 6E 00      .n.             mov  ax, 006E
+00000880    05 02 00      ...             add  ax, #0002
+00000883    A3 70 00      .p.             mov  0070, ax
+00000886    8B 3E 70 00   .>p.            mov  di, ds:0070
+0000088A    C7 05 03 00   ....            mov.w  ds:[di], #0003
+0000088E    A1 68 00      .h.             mov  ax, 0068
+00000891    50            P               push  ax
+00000892    A1 66 00      .f.             mov  ax, 0066
+00000895    50            P               push  ax
+00000896    E8 8F F7      ...             call  F78F  (00000028)
+00000899    83 C4 04      ...             add  sp, #04
+0000089C    89 DC         ..              mov  sp, bx
+0000089E    E8 65 02      .e.             call  0265  (00000B06)
+000008A1    A3 72 00      .r.             mov  0072, ax
+000008A4    A1 72 00      .r.             mov  ax, 0072
+000008A7    A3 02 00      ...             mov  0002, ax
+000008AA    C7 06 78 00   ..x.            mov.w  ds:0078, #0074
+000008AE    74 00         t.
+000008B0    A1 78 00      .x.             mov  ax, 0078
+000008B3    05 00 00      ...             add  ax, #0000
+000008B6    A3 7A 00      .z.             mov  007A, ax
+000008B9    89 E3         ..              mov  bx, sp
+000008BB    6A 3D         j=              push  #3D
+000008BD    68 6B         hk              push  #6B
+000008BF    20 68 61       ha             and  ds:[bx+si+61], ch
+000008C2    63 68 74      cht             arpl  bp, ds:[bx+si+74]
+000008C5    72 68         rh              jb  68  (0000092F)
+000008C7    72 20         r               jb  20  (000008E9)
+000008C9    68 70         hp              push  #70
+000008CB    65            e               seg gs
+000008CC    68 73         hs              push  #73
+000008CE    20 68 6F       ho             and  ds:[bx+si+6F], ch
+000008D1    72 68         rh              jb  68  (0000093B)
+000008D3    63 74 68      cth             arpl  si, ds:[si+68]
+000008D6    53            S               push  bx
+000008D7    65            e               seg gs
+000008D8    8B 3E 7A 00   .>z.            mov  di, ds:007A
+000008DC    89 25         .%              mov  ds:[di], sp
+000008DE    C7 06 7C 00   ....            mov.w  ds:007C, #0074
+000008E2    74 00         t.
+000008E4    A1 7C 00      ...             mov  ax, 007C
+000008E7    05 02 00      ...             add  ax, #0002
+000008EA    A3 7E 00      ...             mov  007E, ax
+000008ED    8B 3E 7E 00   .>..            mov  di, ds:007E
+000008F1    C7 05 12 00   ....            mov.w  ds:[di], #0012
+000008F5    A1 76 00      .v.             mov  ax, 0076
+000008F8    50            P               push  ax
+000008F9    A1 74 00      .t.             mov  ax, 0074
+000008FC    50            P               push  ax
+000008FD    E8 28 F7      .(.             call  F728  (00000028)
+00000900    83 C4 04      ...             add  sp, #04
+00000903    89 DC         ..              mov  sp, bx
+00000905    6A 04         j.              push  #04
+00000907    A1 02 00      ...             mov  ax, 0002
+0000090A    50            P               push  ax
+0000090B    E8 D8 F9      ...             call  F9D8  (000002E6)
+0000090E    83 C4 04      ...             add  sp, #04
+00000911    C7 06 84 00   ....            mov.w  ds:0084, #0080
+00000915    80 00         ..
+00000917    A1 84 00      ...             mov  ax, 0084
+0000091A    05 00 00      ...             add  ax, #0000
+0000091D    A3 86 00      ...             mov  0086, ax
+00000920    89 E3         ..              mov  bx, sp
+00000922    6A 3D         j=              push  #3D
+00000924    68 20         h               push  #20
+00000926    20 68 20       h              and  ds:[bx+si+20], ch
+00000929    20 68 20       h              and  ds:[bx+si+20], ch
+0000092C    20 68 64       hd             and  ds:[bx+si+64], ch
+0000092F    65            e               seg gs
+00000930    68 6D         hm              push  #6D
+00000932    6F            o
+00000933    68 6F         ho              push  #6F
+00000935    20 68 64       hd             and  ds:[bx+si+64], ch
+00000938    65            e               seg gs
+00000939    68 56         hV              push  #56
+0000093B    69 68 5C 6E   ih\n            imul  bp, 5C, ds:[bx+si+6E]
+0000093F    8B 3E 86 00   .>..            mov  di, ds:0086
+00000943    89 25         .%              mov  ds:[di], sp
+00000945    C7 06 88 00   ....            mov.w  ds:0088, #0080
+00000949    80 00         ..
+0000094B    A1 88 00      ...             mov  ax, 0088
+0000094E    05 02 00      ...             add  ax, #0002
+00000951    A3 8A 00      ...             mov  008A, ax
+00000954    8B 3E 8A 00   .>..            mov  di, ds:008A
+00000958    C7 05 12 00   ....            mov.w  ds:[di], #0012
+0000095C    A1 82 00      ...             mov  ax, 0082
+0000095F    50            P               push  ax
+00000960    A1 80 00      ...             mov  ax, 0080
+00000963    50            P               push  ax
+00000964    E8 C1 F6      ...             call  F6C1  (00000028)
+00000967    83 C4 04      ...             add  sp, #04
+0000096A    89 DC         ..              mov  sp, bx
+0000096C    E8 05 02      ...             call  0205  (00000B74)
+0000096F    A3 8C 00      ...             mov  008C, ax
+00000972    6A 04         j.              push  #04
+00000974    A1 8C 00      ...             mov  ax, 008C
+00000977    50            P               push  ax
+00000978    E8 FC FA      ...             call  FAFC  (00000477)
+0000097B    83 C4 04      ...             add  sp, #04
+0000097E    C7 06 92 00   ....            mov.w  ds:0092, #008E
+00000982    8E 00         ..
+00000984    A1 92 00      ...             mov  ax, 0092
+00000987    05 00 00      ...             add  ax, #0000
+0000098A    A3 94 00      ...             mov  0094, ax
+0000098D    89 E3         ..              mov  bx, sp
+0000098F    6A 3D         j=              push  #3D
+00000991    68 20         h               push  #20
+00000993    20 68 79       hy             and  ds:[bx+si+79], ch
+00000996    20 68 6C       hl             and  ds:[bx+si+6C], ch
+00000999    61            a               popall
+0000099A    68 73         hs              push  #73
+0000099C    70 68         ph              jo  68  (00000A06)
+0000099E    64            d               seg fs
+0000099F    69 68 6F 20   iho             imul  bp, 6F, ds:[bx+si+20]
+000009A3    68 64         hd              push  #64
+000009A5    65            e               seg gs
+000009A6    68 56         hV              push  #56
+000009A8    69 68 5C 6E   ih\n            imul  bp, 5C, ds:[bx+si+6E]
+000009AC    8B 3E 94 00   .>..            mov  di, ds:0094
+000009B0    89 25         .%              mov  ds:[di], sp
+000009B2    C7 06 96 00   ....            mov.w  ds:0096, #008E
+000009B6    8E 00         ..
+000009B8    A1 96 00      ...             mov  ax, 0096
+000009BB    05 02 00      ...             add  ax, #0002
+000009BE    A3 98 00      ...             mov  0098, ax
+000009C1    8B 3E 98 00   .>..            mov  di, ds:0098
+000009C5    C7 05 12 00   ....            mov.w  ds:[di], #0012
+000009C9    A1 90 00      ...             mov  ax, 0090
+000009CC    50            P               push  ax
+000009CD    A1 8E 00      ...             mov  ax, 008E
+000009D0    50            P               push  ax
+000009D1    E8 54 F6      .T.             call  F654  (00000028)
+000009D4    83 C4 04      ...             add  sp, #04
+000009D7    89 DC         ..              mov  sp, bx
+000009D9    E8 FC F7      ...             call  F7FC  (000001D8)
+000009DC    A3 9A 00      ...             mov  009A, ax
+000009DF    6A 04         j.              push  #04
+000009E1    A1 9A 00      ...             mov  ax, 009A
+000009E4    50            P               push  ax
+000009E5    E8 8F FA      ...             call  FA8F  (00000477)
+000009E8    83 C4 04      ...             add  sp, #04
+000009EB    C7 06 A0 00   ....            mov.w  ds:00A0, #009C
+000009EF    9C 00         ..
+000009F1    A1 A0 00      ...             mov  ax, 00A0
+000009F4    05 00 00      ...             add  ax, #0000
+000009F7    A3 A2 00      ...             mov  00A2, ax
+000009FA    89 E3         ..              mov  bx, sp
+000009FC    83 EC 01      ...             sub  sp, #01
+000009FF    89 E7         ..              mov  di, sp
+00000A01    C7 05 00 00   ....            mov.w  ds:[di], #0000
+00000A05    68 5C         h\              push  #5C
+00000A07    6E            n
+00000A08    8B 3E A2 00   .>..            mov  di, ds:00A2
+00000A0C    00            .
+00000A0C    89 25         .%              mov  ds:[di], sp
+00000A0E    C7 06 A4 00   ....            mov.w  ds:00A4, #009C
+00000A12    9C 00         ..
+00000A14    A1 A4 00      ...             mov  ax, 00A4
+00000A17    05 02 00      ...             add  ax, #0002
+00000A1A    A3 A6 00      ...             mov  00A6, ax
+00000A1D    8B 3E A6 00   .>..            mov  di, ds:00A6
+00000A21    C7 05 01 00   ....            mov.w  ds:[di], #0001
+00000A25    A1 9E 00      ...             mov  ax, 009E
+00000A28    50            P               push  ax
+00000A29    A1 9C 00      ...             mov  ax, 009C
+00000A2C    50            P               push  ax
+00000A2D    E8 F8 F5      ...             call  F5F8  (00000028)
+00000A30    83 C4 04      ...             add  sp, #04
+00000A33    89 DC         ..              mov  sp, bx
+00000A35    C7 06 AC 00   ....            mov.w  ds:00AC, #00A8
+00000A39    A8 00         ..
+00000A3B    A1 AC 00      ...             mov  ax, 00AC
+00000A3E    05 00 00      ...             add  ax, #0000
+00000A41    A3 AE 00      ...             mov  00AE, ax
+00000A44    89 E3         ..              mov  bx, sp
+00000A46    83 EC 01      ...             sub  sp, #01
+00000A49    89 E7         ..              mov  di, sp
+00000A4B    C7 05 00 00   ....            mov.w  ds:[di], #0000
+00000A4F    68 7C         h.              push  #7C
+00000A51    2F            /
+00000A52    68 2D         h-              push  #2D
+00000A54    5C            \               pop  sp
+00000A55    8B 3E AE 00   .>..            mov  di, ds:00AE
+00000A59    89 25         .%              mov  ds:[di], sp
+00000A5B    C7 06 B0 00   ....            mov.w  ds:00B0, #00A8
+00000A5F    A8 00         ..
+00000A61    A1 B0 00      ...             mov  ax, 00B0
+00000A64    05 02 00      ...             add  ax, #0002
+00000A67    A3 B2 00      ...             mov  00B2, ax
+00000A6A    8B 3E B2 00   .>..            mov  di, ds:00B2
+00000A6E    C7 05 03 00   ....            mov.w  ds:[di], #0003
+00000A72    6A 00         j.              push  #00
+00000A74    A1 AA 00      ...             mov  ax, 00AA
+00000A77    50            P               push  ax
+00000A78    A1 A8 00      ...             mov  ax, 00A8
+00000A7B    50            P               push  ax
+00000A7C    E8 05 F8      ...             call  F805  (00000284)
+00000A7F    83 C4 06      ...             add  sp, #06
+00000A82    89 DC         ..              mov  sp, bx
+00000A84    E8 24 00      .$.             call  0024  (00000AAB)
+00000A87    E9 FD FF      ...             jmp  near FFFD  (00000A87)
+00000A8A    E8 FB 00      ...             call  00FB  (00000B88)
+00000A8D    5E            ^               pop  si
+00000A8E    5F            _               pop  di
+00000A8F    5B            [               pop  bx
+00000A90    C9            .               leave
+00000A91    C3            .               ret  near
+
+00000A92    00 00         ..              add  ds:[bx+si], al
+00000A94    55            U               push  bp
+00000A95    89 E5         ..              mov  bp, sp
+00000A97    B4 03         ..              mov  ah, #03
+00000A99    30 FF         0.              xor  bh, bh
+00000A9B    CD 10         ..              int  #10
+00000A9D    83 F3 07      ...             xor  bx, #07
+00000AA0    8A 46 04      .F.             mov  al, ss:[bp+04]
+00000AA3    B4 0E         ..              mov  ah, #0E
+00000AA5    CD 10         ..              int  #10
+00000AA7    89 EC         ..              mov  sp, bp
+00000AA9    5D            ]               pop  bp
+00000AAA    C3            .               ret  near
+
+00000AAB    52            R               push  dx
+00000AAC    50            P               push  ax
+00000AAD    BA F2 03      ...             mov  dx, #03F2
+00000AB0    30 C0         0.              xor  al, al
+00000AB2    EE            .               out  dx, al
+00000AB3    58            X               pop  ax
+00000AB4    5A            Z               pop  dx
+00000AB5    C3            .               ret  near
+
+00000AB6    BB F8 01      ...             mov  bx, #01F8
+00000AB9    8B 07         ..              mov  ax, ds:[bx]
+00000ABB    50            P               push  ax
+00000ABC    BB FA 01      ...             mov  bx, #01FA
+00000ABF    8B 07         ..              mov  ax, ds:[bx]
+00000AC1    50            P               push  ax
+00000AC2    BB FC 01      ...             mov  bx, #01FC
+00000AC5    8B 07         ..              mov  ax, ds:[bx]
+00000AC7    50            P               push  ax
+00000AC8    BB FE 01      ...             mov  bx, #01FE
+00000ACB    8B 07         ..              mov  ax, ds:[bx]
+00000ACD    5B            [               pop  bx
+00000ACE    53            S               push  bx
+00000ACF    50            P               push  ax
+00000AD0    89 D8         ..              mov  ax, bx
+00000AD2    8C C9         ..              mov  cx, cs
+00000AD4    01 C8         ..              add  ax, cx
+00000AD6    8E D8         ..              mov  ds, ax
+00000AD8    89 D8         ..              mov  ax, bx
+00000ADA    8C D1         ..              mov  cx, ss
+00000ADC    01 C8         ..              add  ax, cx
+00000ADE    C1 E3 04      ...             sal  bx, #04
+00000AE1    29 E3         ).              sub  bx, sp
+00000AE3    8E D0         ..              mov  ss, ax
+00000AE5    89 DC         ..              mov  sp, bx
+00000AE7    58            X               pop  ax
+00000AE8    A3 B8 00      ...             mov  00B8, ax
+00000AEB    58            X               pop  ax
+00000AEC    A3 BA 00      ...             mov  00BA, ax
+00000AEF    58            X               pop  ax
+00000AF0    A3 B4 00      ...             mov  00B4, ax
+00000AF3    58            X               pop  ax
+00000AF4    A3 B6 00      ...             mov  00B6, ax
+00000AF7    C3            .               ret  near
+
+00000AF8    B4 88         ..              mov  ah, #88
+00000AFA    CD 15         ..              int  #15
+00000AFC    C3            .               ret  near
+
+00000AFD    B8 05 03      ...             mov  ax, #0305
+00000B00    BB 00 00      ...             mov  bx, #0000
+00000B03    CD 16         ..              int  #16
+00000B05    C3            .               ret  near
+
+00000B06    31 D2         1.              xor  dx, dx
+00000B08    B9 12 00      ...             mov  cx, #0012
+00000B0B    B8 00 10      ...             mov  ax, #1000
+00000B0E    8E C0         ..              mov  es, ax
+00000B10    BB 00 00      ...             mov  bx, #0000
+00000B13    B8 01 02      ...             mov  ax, #0201
+00000B16    CD 13         ..              int  #13
+00000B18    73 0D         s.              jnb  0D  (00000B27)
+00000B1A    B9 0F 00      ...             mov  cx, #000F
+00000B1D    B8 81 00      ...             mov  ax, #0081
+00000B20    CD 13         ..              int  #13
+00000B22    73 03         s.              jnb  03  (00000B27)
+00000B24    B9 09 00      ...             mov  cx, #0009
+00000B27    89 C8         ..              mov  ax, cx
+00000B29    C3            .               ret  near
+
+00000B2A    55            U               push  bp
+00000B2B    89 E5         ..              mov  bp, sp
+00000B2D    8B 46 04      .F.             mov  ax, ss:[bp+04]
+00000B30    88 C6         ..              mov  dh, al
+00000B32    8B 46 06      .F.             mov  ax, ss:[bp+06]
+00000B35    88 C2         ..              mov  dl, al
+00000B37    8B 46 08      .F.             mov  ax, ss:[bp+08]
+00000B3A    88 C5         ..              mov  ch, al
+00000B3C    8B 46 0A      .F.             mov  ax, ss:[bp+0A]
+00000B3F    88 C1         ..              mov  cl, al
+00000B41    8B 46 0E      .F.             mov  ax, ss:[bp+0E]
+00000B44    8E C0         ..              mov  es, ax
+00000B46    8B 46 10      .F.             mov  ax, ss:[bp+10]
+00000B49    89 C3         ..              mov  bx, ax
+00000B4B    8B 46 0C      .F.             mov  ax, ss:[bp+0C]
+00000B4E    B4 02         ..              mov  ah, #02
+00000B50    56            V               push  si
+00000B51    57            W               push  di
+00000B52    52            R               push  dx
+00000B53    51            Q               push  cx
+00000B54    53            S               push  bx
+00000B55    50            P               push  ax
+00000B56    CD 13         ..              int  #13
+00000B58    72 0D         r.              jb  0D  (00000B67)
+00000B5A    58            X               pop  ax
+00000B5B    5B            [               pop  bx
+00000B5C    59            Y               pop  cx
+00000B5D    5A            Z               pop  dx
+00000B5E    5F            _               pop  di
+00000B5F    5E            ^               pop  si
+00000B60    B8 01 00      ...             mov  ax, #0001
+00000B63    89 EC         ..              mov  sp, bp
+00000B65    5D            ]               pop  bp
+00000B66    C3            .               ret  near
+
+00000B67    58            X               pop  ax
+00000B68    5B            [               pop  bx
+00000B69    59            Y               pop  cx
+00000B6A    5A            Z               pop  dx
+00000B6B    5F            _               pop  di
+00000B6C    5E            ^               pop  si
+00000B6D    A1 00 00      ...             mov  ax, 0000
+00000B70    89 EC         ..              mov  sp, bp
+00000B72    5D            ]               pop  bp
+00000B73    C3            .               ret  near
+
+00000B74    55            U               push  bp
+00000B75    89 E5         ..              mov  bp, sp
+00000B77    56            V               push  si
+00000B78    57            W               push  di
+00000B79    1E            .               push  ds
+00000B7A    53            S               push  bx
+00000B7B    B4 0F         ..              mov  ah, #0F
+00000B7D    CD 10         ..              int  #10
+00000B7F    5B            [               pop  bx
+00000B80    1F            .               pop  ds
+00000B81    5F            _               pop  di
+00000B82    5E            ^               pop  si
+00000B83    89 EC         ..              mov  sp, bp
+00000B85    5D            ]               pop  bp
+00000B86    C3            .               ret  near
+
+00000B87    00 55 89      .U.             add  ds:[di+89], dl
+00000B8A    E5 83         ..              in  ax, 83
+00000B8C    EC            .               in  al, dx
+00000B8D    10 53 57      .SW             adc  ss:[bp+di+57], dl
+00000B90    56            V               push  si
+00000B91    C7 46 FE 00   .F..            mov.w  ss:[bp+no of bytes in operand is inconsistant - program error   2   1
+00FE], #no of bytes in operand is inconsistant - program error   1   2
+00
+00000B95    00            .
+00000B96    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+00000B99    8B 16 BC 00   ....            mov  dx, ds:00BC
+00000B9D    39 D0         9.              cmp  ax, dx
+00000B9F    7D 03         ..              jnl  03  (00000BA4)
+00000BA1    E9 03 00      ...             jmp  near 0003  (00000BA7)
+00000BA4    E9 49 00      .I.             jmp  near 0049  (00000BF0)
+00000BA7    B8 BE 00      ...             mov  ax, #00BE
+00000BAA    05 00 00      ...             add  ax, #0000
+00000BAD    89 46 FC      .F.             mov  ss:[bp+FC], ax
+00000BB0    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+00000BB3    89 46 FA      .F.             mov  ss:[bp+FA], ax
+00000BB6    8B 46 FA      .F.             mov  ax, ss:[bp+FA]
+00000BB9    6B C0 02      k..             imul  ax, 02, al
+00000BBC    89 46 F8      .F.             mov  ss:[bp+F8], ax
+00000BBF    B8 00 00      ...             mov  ax, #0000
+00000BC2    03 46 F8      .F.             add  ax, ss:[bp+F8]
+00000BC5    89 46 F6      .F.             mov  ss:[bp+F6], ax
+00000BC8    8B 46 FC      .F.             mov  ax, ss:[bp+FC]
+00000BCB    03 46 F6      .F.             add  ax, ss:[bp+F6]
+00000BCE    89 46 F4      .F.             mov  ss:[bp+F4], ax
+00000BD1    8B 7E F4      ...             mov  di, ss:[bp+F4]
+00000BD4    8B 05         ..              mov  ax, ds:[di]
+00000BD6    FF D0         ..              call  [%]
+00000BD8    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+00000BDB    89 46 F2      .F.             mov  ss:[bp+F2], ax
+00000BDE    8B 46 F2      .F.             mov  ax, ss:[bp+F2]
+00000BE1    05 01 00      ...             add  ax, #0001
+00000BE4    89 46 F0      .F.             mov  ss:[bp+F0], ax
+00000BE7    8B 46 F0      .F.             mov  ax, ss:[bp+F0]
+00000BEA    89 46 FE      .F.             mov  ss:[bp+FE], ax
+00000BED    E9 A6 FF      ...             jmp  near FFA6  (00000B96)
+00000BF0    5E            ^               pop  si
+00000BF1    5F            _               pop  di
+00000BF2    5B            [               pop  bx
+00000BF3    83 C4 10      ...             add  sp, #10
+00000BF6    C9            .               leave
+00000BF7    C3            .               ret  near
+
+00000BF8    55            U               push  bp
+00000BF9    89 E5         ..              mov  bp, sp
+00000BFB    53            S               push  bx
+00000BFC    57            W               push  di
+00000BFD    56            V               push  si
+00000BFE    E8 87 FF      ...             call  FF87  (00000B88)
+00000C01    83 EC 01      ...             sub  sp, #01
+00000C04    89 E7         ..              mov  di, sp
+00000C06    C6 05 48      ..H             mov.b  ds:[di], #48
+00000C09    E8 88 FE      ...             call  FE88  (00000A94)
+00000C0C    83 C4 01      ...             add  sp, #01
+00000C0F    83 EC 01      ...             sub  sp, #01
+00000C12    89 E7         ..              mov  di, sp
+00000C14    C6 05 41      ..A             mov.b  ds:[di], #41
+00000C17    E8 7A FE      .z.             call  FE7A  (00000A94)
+00000C1A    83 C4 01      ...             add  sp, #01
+00000C1D    83 EC 01      ...             sub  sp, #01
+00000C20    89 E7         ..              mov  di, sp
+00000C22    C6 05 4C      ..L             mov.b  ds:[di], #4C
+00000C25    E8 6C FE      .l.             call  FE6C  (00000A94)
+00000C28    83 C4 01      ...             add  sp, #01
+00000C2B    83 EC 01      ...             sub  sp, #01
+00000C2E    89 E7         ..              mov  di, sp
+00000C30    C6 05 54      ..T             mov.b  ds:[di], #54
+00000C33    E8 5E FE      .^.             call  FE5E  (00000A94)
+00000C36    83 C4 01      ...             add  sp, #01
+00000C39    E9 FD FF      ...             jmp  near FFFD  (00000C39)
+00000C3C    5E            ^               pop  si
+00000C3D    5F            _               pop  di
+00000C3E    5B            [               pop  bx
+00000C3F    C9            .               leave
+00000C40    C3            .               ret  near
+
+00000C41    55            U               push  bp
+00000C42    89 E5         ..              mov  bp, sp
+00000C44    53            S               push  bx
+00000C45    57            W               push  di
+00000C46    56            V               push  si
+00000C47    8B 46 04      .F.             mov  ax, ss:[bp+04]
+00000C4A    A3 D4 00      ...             mov  00D4, ax
+00000C4D    C7 06 D6 00   ....            mov.w  ds:00D6, #0001
+00000C51    01 00         ..
+00000C53    5E            ^               pop  si
+00000C54    5F            _               pop  di
+00000C55    5B            [               pop  bx
+00000C56    C9            .               leave
+00000C57    C3            .               ret  near
+
+00000C58    55            U               push  bp
+00000C59    89 E5         ..              mov  bp, sp
+00000C5B    83 EC 0E      ...             sub  sp, #0E
+00000C5E    53            S               push  bx
+00000C5F    57            W               push  di
+00000C60    56            V               push  si
+00000C61    B8 BE 00      ...             mov  ax, #00BE
+00000C64    05 00 00      ...             add  ax, #0000
+00000C67    89 46 FE      .F.             mov  ss:[bp+FE], ax
+00000C6A    A1 BC 00      ...             mov  ax, 00BC
+00000C6D    89 46 FC      .F.             mov  ss:[bp+FC], ax
+00000C70    8B 46 FC      .F.             mov  ax, ss:[bp+FC]
+00000C73    6B C0 02      k..             imul  ax, 02, al
+00000C76    89 46 FA      .F.             mov  ss:[bp+FA], ax
+00000C79    B8 00 00      ...             mov  ax, #0000
+00000C7C    03 46 FA      .F.             add  ax, ss:[bp+FA]
+00000C7F    89 46 F8      .F.             mov  ss:[bp+F8], ax
+00000C82    8B 46 FE      .F.             mov  ax, ss:[bp+FE]
+00000C85    03 46 F8      .F.             add  ax, ss:[bp+F8]
+00000C88    89 46 F6      .F.             mov  ss:[bp+F6], ax
+00000C8B    8B 46 04      .F.             mov  ax, ss:[bp+04]
+00000C8E    8B 7E F6      ...             mov  di, ss:[bp+F6]
+00000C91    89 05         ..              mov  ds:[di], ax
+00000C93    A1 BC 00      ...             mov  ax, 00BC
+00000C96    89 46 F4      .F.             mov  ss:[bp+F4], ax
+00000C99    8B 46 F4      .F.             mov  ax, ss:[bp+F4]
+00000C9C    05 01 00      ...             add  ax, #0001
+00000C9F    89 46 F2      .F.             mov  ss:[bp+F2], ax
+00000CA2    8B 46 F2      .F.             mov  ax, ss:[bp+F2]
+00000CA5    A3 BC 00      ...             mov  00BC, ax
+00000CA8    5E            ^               pop  si
+00000CA9    5F            _               pop  di
+00000CAA    5B            [               pop  bx
+00000CAB    83 C4 0E      ...             add  sp, #0E
+00000CAE    C9            .               leave
+00000CAF    C3            .               ret  near
+
+00000CB0    55            U               push  bp
+00000CB1    89 E5         ..              mov  bp, sp
+00000CB3    53            S               push  bx
+00000CB4    57            W               push  di
+00000CB5    56            V               push  si
+00000CB6    C7 06 BC 00   ....            mov.w  ds:00BC, #0000
+00000CBA    00 00         ..
+00000CBC    C7 06 D4 00   ....            mov.w  ds:00D4, #0000
+00000CC0    00 00         ..
+00000CC2    C7 06 D6 00   ....            mov.w  ds:00D6, #0000
+00000CC6    00 00         ..
+00000CC8    5E            ^               pop  si
+00000CC9    5F            _               pop  di
+00000CCA    5B            [               pop  bx
+00000CCB    C9            .               leave
+00000CCC    C3            .               ret  near
+
+00000CCD    00 00         ..              add  ds:[bx+si], al
+00000CCF    00 00 D6 00   ....

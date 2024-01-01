@@ -1,0 +1,26 @@
+DEFINITION MODULE NonAscii ;
+
+
+EXPORT QUALIFIED hm , up , puh, lft, rgt, end, dwn,
+                 chm, cpu, bw , fw , ce , cpd, in ,
+                 dl , pdh ;
+
+CONST
+   hm  = 107C ;  (* Home                         *)
+   up  = 110C ;  (* Cursor Up                    *)
+   puh = 111C ;  (* Page Up and Home             *)
+   lft = 113C ;  (* Left Cursor                  *)
+   rgt = 115C ;  (* Right Cursor                 *)
+   end = 117C ;  (* End                          *)
+   dwn = 120C ;  (* Cursor Down                  *)
+   in  = 122C ;  (* Insert                       *)
+   dl  = 123C ;  (* Delete                       *)
+   pdh = 121C ;  (* Page Down and Home           *)
+   bw  = 163C ;  (* Backwards a Word             *)
+   fw  = 164C ;  (* Forwards a Word              *)
+   ce  = 165C ;  (* Ctrl End                     *)
+   cpd = 166C ;  (* Ctrl Page Up                 *)
+   chm = 167C ;  (* Ctrl Home                    *)
+   cpu = 204C ;  (* Ctrl Page Up                 *)
+
+END NonAscii.

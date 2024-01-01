@@ -1,0 +1,19 @@
+DEFINITION MODULE Architecture ;
+
+(*
+    Title      : Architecture
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Fri Jul 10 10:58:53 1998
+    Last edit  : Fri Jul 10 10:58:53 1998
+    Description: provides a relative speed indicator.
+*)
+
+EXPORT QUALIFIED RelativeSpeed, IsSimulation ;
+
+CONST
+   RelativeSpeed = 100000 ;
+   IsSimulation  =  FALSE ;
+
+
+END Architecture.

@@ -1,0 +1,121 @@
+DEFINITION MODULE Util ;
+
+(*
+    Title      : Util
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Thu Jul 21 16:16:07 1994
+    Last edit  : Thu Jul 21 16:16:07 1994
+    Description: provides basic BIOS interface for the startup code.
+*)
+
+EXPORT QUALIFIED WriteChar,
+                 GetExtendedSize, SetKeyboard,
+                 GetSectorsPerTrack, ReadTrack,
+                 GetVideoMode, Get16, Put16,
+                 CursorOff,
+                 OSSize, OSStart, SecondSize, SecondData,
+                 DebuggingWithGDB, StackSize, DriveNo, Red, Blue ;
+
+
+VAR
+   DriveNo,
+   OSSize, OSStart, SecondSize, SecondData,
+   DebuggingWithGDB, StackSize            : CARDINAL ;
+
+
+(*
+   WriteChar - uses the BIOS to write a character to the screen.
+*)
+
+PROCEDURE WriteChar (ch: CHAR) ;
+
+
+(*
+   ResetFloppy - reset the floppy drive
+*)
+
+PROCEDURE ResetFloppy ;
+
+
+(*
+   KillMotor - turns the motor of the floppy drive off.
+*)
+
+PROCEDURE KillMotor ;
+
+
+(*
+   GetExtendedSize - returns the extended memory size in kB.
+*)
+
+PROCEDURE GetExtendedSize () : CARDINAL ;
+
+
+(*
+   SetKeyboard - set the keyboard repeat rate to the maximum.
+*)
+
+PROCEDURE SetKeyboard ;
+
+
+(*
+   GetSectorsPerTrack - return the number of sectors per track
+                        on diskette A.
+*)
+
+PROCEDURE GetSectorsPerTrack () : CARDINAL ;
+
+
+(*
+   ReadTrack - read in a track from, Head, Drive, Track, Sector
+               NoOfSectors and the address.
+*)
+
+PROCEDURE ReadTrack (Head, Drive, Track, Sector, NoOfSectors,
+                     SegAddr, OffsetAddr: CARDINAL) : BOOLEAN ;
+
+
+(*
+   GetVideoMode - returns the video mode number obtained from the BIOS.
+*)
+
+PROCEDURE GetVideoMode () : CARDINAL ;
+
+
+(*
+   Get16 - returns a 16 bit word from seg, offset.
+*)
+
+PROCEDURE Get16 (Segment, Offset: CARDINAL) : CARDINAL ;
+
+
+(*
+   Put16 - places a 16 bit word into seg, offset.
+*)
+
+PROCEDURE Put16 (Segment, Offset: CARDINAL; word: CARDINAL) ;
+
+
+(*
+   CursorOff - switches the cursor off.
+*)
+
+PROCEDURE CursorOff ;
+
+
+(*
+   Red - places a red cursor at top left corner of the screen.
+*)
+
+PROCEDURE Red ;
+
+
+(*
+   Blue - places a blue cursor at top left corner of the screen.
+*)
+
+PROCEDURE Blue ;
+
+
+END Util.

@@ -1,0 +1,47 @@
+DEFINITION MODULE BufferDevice ;
+
+(*
+   Author      : Gaius Mulley
+   Version     : 1.0
+   Date        : 12/2/86
+   Last Update : 2/8/86
+   Description : Exports a general Read and Write Buffer procedure. Buffers
+                 are dynamic.
+*)
+
+EXPORT QUALIFIED InitBuffer, KillBuffer, ReadBuffer, WriteBuffer,
+                 Buffer ;
+
+TYPE
+   Buffer ;
+
+
+(*
+   InitBuffer - creates, and initializes, a buffer and returns it.
+*)
+
+PROCEDURE InitBuffer () : Buffer ;
+
+(*
+   KillBuffer - destroys the buffer and relinquishes all associated
+                resources.
+*)
+
+PROCEDURE KillBuffer (VAR b: Buffer) ;
+
+
+(*
+   ReadBuffer - reads a character, ch, from the buffer, b.
+*)
+
+PROCEDURE ReadBuffer (b: Buffer ; VAR ch: CHAR) ;
+
+
+(*
+   WriteBuffer - places a character, ch, into buffer, b.
+*)
+
+PROCEDURE WriteBuffer (b: Buffer ; ch: CHAR) ;
+
+
+END BufferDevice.

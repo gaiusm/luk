@@ -1,0 +1,567 @@
+IMPLEMENTATION MODULE SerIOA ;
+
+(*
+    Title      : SerIOA
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Fri Sep  9 08:12:01 1994
+    Last edit  : Fri Sep  9 08:12:01 1994
+    Description: Contains a buffered Read and a buffered Write.
+                 Input operates under interrupt control, output
+                 is achieved by polling.
+                 Flow control implemented by XON XOFF
+*)
+
+IMPORT Scn ;
+
+FROM Kernel IMPORT Wait, Signal, SEMAPHORE, InitProcess, Resume,
+                   WaitForIO, InitSemaphore, ProcType, Suspend,
+                   PtrToProcDes, GetPriority, PutPriority,
+                   CurrentProcess, IsrSignal ;
+
+FROM BufferDevice IMPORT Buffer,
+                         InitBuffer, ReadBuffer, WriteBuffer ;
+
+FROM SYSTEM IMPORT In8, Out8, LISTEN, TurnInterrupts, OnOrOff,
+                   BYTE, BITSET ;
+FROM DeviceConfiguration IMPORT Parity, GetIrqNo ;
+FROM ASCII IMPORT dc1, dc3 ;
+IMPORT MonStrIO ;
+
+
+CONST
+   StackSpace = 50000 ;  (* Allows a process a maximum of 800  *)
+                         (* bytes for the stack space of this  *)
+                         (* process.                           *)
+
+
+(* Set up constants for the ports that are accessed.          *)
+
+CONST
+   (* the following constant declaration may be modified to change *)
+   (* the module for the alternate communications adapter.         *)
+
+   Com1 = 1 ; (* = 1 means TRUE  or COM1 is used *)
+              (* = 0 means FALSE or COM2 is used *)
+
+   IrqBase= 020H ;   (* irq interrupts live from 020..030 *)
+
+   IOBase = 2F8H + Com1 * 100H;
+
+   LineContrReg    = IOBase+03H; (* to specify format of transmitted data  *)
+   LowBaudRateDiv  = IOBase+00H; (* lower byte of divisor                  *)
+   HighBaudRateDiv = IOBase+01H; (* higher byte of divisor                 *)
+   LineStatusReg   = IOBase+05H; (* holds status info on the data transfer *)
+   ReceiverReg     = IOBase+00H; (* received char is in this register      *)
+   TransmitReg     = IOBase+00H; (* char to send is to put in this reg     *)
+   IntEnableReg    = IOBase+01H; (* to enable the selected interrupt       *)
+   ModemContrReg   = IOBase+04H; (* controls the interface to a modem      *)
+   IntIdentReg     = IOBase+02H; (* Determines what caused interrupt.      *)
+   ModemStatusReg  = IOBase+06H; (* Determines status on the ctrl lines.   *)
+
+   (* Line Status Registers Bits *)
+
+   DataReadyBit         = 00H ;
+   OverrunErrorBit      = 01H ;
+   ParityErrorBit       = 02H ;
+   FramingErrorBit      = 03H ;
+   BreakIndicatorBit    = 04H ;
+   TxHoldingRegEmptyBit = 05H ;
+   TxShiftRegEmptyBit   = 06H ;
+   FifoErrorBit         = 07H ;
+
+   (* Interrupt Enable Register Bits *)
+
+   EnableDataAvailableInt     = 00H ;
+   EnableTxHoldingRegEmptyInt = 01H ;
+   EnableModemStatusInt       = 03H ;
+
+
+VAR
+   IrqNo   : CARDINAL ;
+   THREsem : SEMAPHORE ;
+   RDAsem  : SEMAPHORE ;
+   RCch    : CHAR ;   (* Character received *)
+
+
+PROCEDURE DLAB (Bit: CARDINAL) ;
+VAR
+   Status : BITSET ;
+   Byte   : CHAR ;
+BEGIN
+   Byte := In8( LineContrReg ) ;
+   Status := BITSET( ORD( Byte ) ) ;
+   IF Bit=1
+   THEN
+      INCL(Status, 7)
+   ELSE
+      EXCL(Status, 7)
+   END ;
+   Out8(LineContrReg, VAL(BYTE, Status))
+END DLAB ;
+
+
+(*
+   Init - Initializes the serial port to specific values.
+          The legal values for the parameters are:
+             BaudRate  : 300..9600
+             StopBits  : 1..2
+             WordLength: 5..8
+             Parity    : None, Odd, Even
+*)
+
+PROCEDURE Init (BaudRate, StopBits, WordLength: CARDINAL ;
+                p: Parity ; VAR Done: BOOLEAN) ;
+VAR
+   DivisorLow,
+   DivisorHigh: BYTE ;
+   Parameters : BITSET ;
+BEGIN
+   Done := TRUE ;
+   CASE BaudRate OF
+
+   300   : DivisorLow := 80H ;
+           DivisorHigh := 1H |
+
+   600   : DivisorLow := 0C0H ;
+           DivisorHigh := 0H |
+
+   1200  : DivisorLow := 60H ;
+           DivisorHigh := 0H |
+
+   2400  : DivisorLow := 30H ;
+           DivisorHigh := 0H |
+
+   4800  : DivisorLow := 18H ;
+           DivisorHigh := 0H |
+
+   9600  : DivisorLow := 0CH ;
+           DivisorHigh := 0H |
+
+   19200 : DivisorLow := 06H ;
+           DivisorHigh := 0H
+
+   ELSE
+      Done := FALSE
+   END ;
+   IF Done
+   THEN
+      (* load the Divisor of the baud rate generator: *)
+      DLAB(1) ;
+      Out8(HighBaudRateDiv, DivisorHigh) ;
+      Out8(LowBaudRateDiv, DivisorLow) ;
+      DLAB(0) ;
+
+      (* prepare the Parameters: *)
+      Parameters := {};
+      IF StopBits=2
+      THEN
+         INCL(Parameters, 2) ;
+      ELSIF StopBits#1
+      THEN
+         Done := FALSE
+      END ;
+      IF (p=Odd) OR (p=Even)
+      THEN
+         INCL(Parameters, 3) ;
+         IF p=Even
+         THEN
+            INCL(Parameters, 4)
+         END
+      END ;
+      CASE WordLength OF
+
+      5 : |
+      6 : INCL(Parameters, 0) |
+      7 : INCL(Parameters, 1) |
+      8 : INCL(Parameters, 0) ;
+          INCL(Parameters, 1)
+
+      ELSE
+         Done := FALSE
+      END ;
+      IF Done
+      THEN
+         Out8(LineContrReg, VAL(BYTE, Parameters))
+      END
+   END
+END Init ;
+
+
+PROCEDURE SetUpCommPort ;
+VAR
+   BitSet: BITSET ;
+   ch    : CHAR ;
+   Pri   : CARDINAL ;
+   Type  : ProcType ;
+BEGIN
+   (* Disable Interrupts *)
+   DLAB(0) ;
+   Out8(LineContrReg, 0H) ;
+   Out8(IntEnableReg, 0H) ;
+
+   (* clear the controller: *)
+   BitSet := VAL(BITSET, In8(LineStatusReg)) ;
+   IF DataReadyBit IN BitSet
+   THEN
+      (* data ready *)
+      ch := In8(ReceiverReg)
+   END ;
+
+   IF TxHoldingRegEmptyBit IN BitSet
+   THEN
+      Out8(TransmitReg, ch)
+   END ;
+
+   (* We can set the line status to {} see page 1-213 of the IBM-PC *)
+   (* technical manual.                                             *)
+   Out8(LineStatusReg, 00H) ;   (* Controller cleared *)
+
+   (* Select the type of interrupts we require. *)
+
+   BitSet := {} ;
+   BitSet := VAL(BITSET, In8(ModemContrReg)) ;
+   INCL(BitSet, 3) ;      (* bit 3 must be set, otherwise no  *)
+                          (* interrupts will be generated;    *)
+                          (* see technical reference of       *)
+                          (* IBM-PC, page 1-200               *)
+
+   INCL(BitSet, 0) ;      (* set DTR                          *)
+   INCL(BitSet, 1) ;      (* set RTS - always keep active     *)
+   Out8(ModemContrReg, VAL(BYTE, BitSet)) ;
+
+   (* Enable interrupts in the communications controller (8250):  *)
+   (*        Allow receiver interrupts and transmitter interrupts *)
+   (*        and Modem status interrupts. Specifically CTS.       *)
+
+   Out8(IntEnableReg, { (* EnableTxHoldingRegEmptyInt, *)
+                          EnableDataAvailableInt (* ,
+                          EnableModemStatusInt *) }) ;
+
+END SetUpCommPort ;
+
+
+
+(*
+PROCEDURE Read (VAR ch: CHAR) ;
+VAR
+   BitSet: BITSET ;
+BEGIN
+   (* Set DTR active *)
+   INBYTE(ModemContrReg, BitSet) ;
+   INCL(BitSet, 0) ;
+   OUTBYTE(ModemContrReg, BitSet) ;
+   (* wait until character has arrived in the receiver register *)
+   REPEAT
+      INBYTE(LineStatusReg, BitSet)
+   UNTIL DataReadyBit IN BitSet ;
+   (* ok now read data *)
+   INBYTE(ReceiverReg, ch) ;
+   (* Set DTR Non Active *)
+   INBYTE(ModemContrReg, BitSet) ;
+   EXCL(BitSet, 0) ;
+   OUTBYTE(ModemContrReg, BitSet)
+END Read ;
+*)
+
+(*
+PROCEDURE Write (ch: CHAR) ;
+VAR
+   BitSet: BITSET ;
+BEGIN
+   (* Set RTS active - purely as a precaution against cables which *)
+   (* double back the RTS and CTS wires!                           *)
+   INBYTE(ModemContrReg, BitSet) ;
+   INCL(BitSet, 1) ;    (* RTS bit *)
+   OUTBYTE(ModemContrReg, BitSet) ;
+   (* wait until transmitter buffer is totally free *)
+   REPEAT
+      INBYTE(LineStatusReg, BitSet)
+   UNTIL (TxHoldingRegEmptyBit IN BitSet) AND (TxShiftRegEmptyBit IN BitSet) ;
+   (* wait until CTS becomes active *)
+   REPEAT
+      INBYTE(ModemStatusReg, BitSet)
+   UNTIL 4 IN BitSet ;
+   OUTBYTE(TransmitReg, ch) ;
+   (* Set RTS non active - purley as a precaution for compatibility *)
+   INBYTE(ModemContrReg, BitSet) ;
+   EXCL(BitSet, 1) ;    (* RTS bit *)
+   OUTBYTE(ModemContrReg, BitSet) ;
+END Write ;
+*)
+
+
+PROCEDURE BusyWrite (ch: CHAR) : BOOLEAN ;
+VAR
+   BitSet: BITSET ;
+BEGIN
+   (* wait until transmitter buffer is totally free *)
+   BitSet := VAL(BITSET, In8(LineStatusReg)) ;
+   IF (TxHoldingRegEmptyBit IN BitSet) AND (TxShiftRegEmptyBit IN BitSet)
+   THEN
+      Out8(TransmitReg, ch) ;
+      RETURN( TRUE )
+   ELSE
+      RETURN( FALSE )
+   END
+END BusyWrite ;
+
+
+(*
+   N.B - The RS232 cable is wired up as:
+
+
+   MC1                           MC2
+
+
+   TX   <--------------------->   RC
+
+   RC   <--------------------->   TX
+                                 
+   CTS  <--------------------->  DTR
+
+   DTR  <--------------------->  CTS
+
+   GND  <--------------------->  GND
+
+   RTS  <--------------------->  DSR
+
+   DSR  <--------------------->  RTS
+*)
+
+PROCEDURE ReadDriver ;
+VAR
+   BitSet  : BITSET ;
+   Ctrl    : CHAR ;
+   OldState: OnOrOff ;
+BEGIN
+   OldState := TurnInterrupts(Off) ;
+   Ctrl := dc1 ;  (* Xon *)
+   LOOP
+      Scn.Write('W') ;
+      WaitForIO(IrqBase+IrqNo) ;
+      Scn.Write('I') ;
+      (*
+         ok an interrupt has occurred
+      *)
+
+      (* ok now read data *)
+      BitSet := VAL(BITSET, In8(LineStatusReg)) ;
+      IF OverrunErrorBit IN BitSet
+      THEN
+         MonStrIO.WriteString('<overrun>')
+      END ;
+      IF ParityErrorBit IN BitSet
+      THEN
+         MonStrIO.WriteString('<parity>')
+      END ;
+      IF FramingErrorBit IN BitSet
+      THEN
+         MonStrIO.WriteString('<framing>')
+      END ;
+      IF BreakIndicatorBit IN BitSet
+      THEN
+         MonStrIO.WriteString('<break>')
+      END ;
+      IF DataReadyBit IN BitSet
+      THEN
+         RCch := In8(ReceiverReg) ;
+         Scn.Write('[') ;
+         Scn.Write(RCch) ;
+         Scn.Write(']') ;
+         IF (RCch=dc3) AND (Ctrl=dc1)
+         THEN
+            Scn.Write('s') ;
+            Scn.Write('u') ;
+            Scn.Write('s') ;
+            Scn.Write('p') ;
+            Suspend(SerW) ;
+            Ctrl := RCch
+         ELSIF (RCch=dc1) AND (Ctrl=dc3)
+         THEN
+            Scn.Write('r') ;
+            Scn.Write('e') ;
+            Scn.Write('s') ;
+            Scn.Write('m') ;
+            Resume(SerW) ;
+            Ctrl := RCch
+         ELSE
+            WriteToReadBuf(RCch)
+         END
+      END
+   END
+END ReadDriver ;
+
+
+PROCEDURE WriteDriver ;
+VAR
+   TXch    : CHAR ;
+   BitSet  : BITSET ;
+   OldState: OnOrOff ;
+BEGIN
+   OldState := TurnInterrupts(Off) ;
+   LOOP
+      ReadBuffer(WriteBuf, TXch) ;
+
+      IF SendCtrl
+      THEN
+         WHILE NOT BusyWrite(CtrlChar) DO
+            LISTEN
+         END ;
+         SendCtrl := FALSE
+      END ;
+      WHILE NOT BusyWrite(TXch) DO
+         LISTEN
+      END
+   END
+END WriteDriver ;
+
+
+PROCEDURE WriteToReadBuf (ch: CHAR) ;
+BEGIN
+   IF SpaceAvailable>0
+   THEN
+      buf[in] := ch ;
+      in := (in+1) MOD MaxBuffer ;
+      DEC(SpaceAvailable) ;
+      Signal(ItemAvailable)
+   END ;
+   IF SpaceAvailable<WriteThreshold
+   THEN
+      Scn.Write('x') ;
+      Scn.Write('o') ;
+      Scn.Write('f') ;
+      Scn.Write('f') ;
+      SendCtrl := TRUE ;
+      CtrlChar := dc3 ;  (* Xoff *)
+   END
+END WriteToReadBuf ;
+
+
+PROCEDURE ReadFromReadBuf (VAR ch: CHAR) ;
+BEGIN
+   Wait(ItemAvailable) ;
+   INC(SpaceAvailable) ;
+   ch := buf[out] ;
+   out := (out+1) MOD MaxBuffer ;
+   IF (SpaceAvailable=ReadThreshold) AND (CtrlChar=dc3)
+   THEN
+      SendCtrl := TRUE ;
+      CtrlChar := dc1 ;  (* Xon *)
+      Scn.Write('x') ;
+      Scn.Write('o') ;
+      Scn.Write('n') ;
+   END
+END ReadFromReadBuf ;
+
+
+PROCEDURE InitBuf ;
+BEGIN
+   SpaceAvailable := MaxBuffer ;
+   in := 0 ;
+   out := 0 ;
+   CtrlChar := dc1 ; (* Currently in Xon state *)
+   SendCtrl := TRUE ;
+   InitSemaphore(ItemAvailable, 0) ;
+
+   (*
+      Initialize the Driver semaphores and booleans.
+   *)
+   InitSemaphore(THREsem, 0) ;
+   InitSemaphore(RDAsem, 0) ;
+
+END InitBuf ;
+
+
+CONST
+   MaxBuffer     = 50 ;
+   ReadThreshold = 15 ;
+   WriteThreshold= 10 ;
+
+
+VAR
+   buf           : ARRAY [0..MaxBuffer] OF CHAR ;
+   SpaceAvailable: CARDINAL ;
+   ItemAvailable : SEMAPHORE ;
+   in, out       : CARDINAL ;
+   CtrlChar      : CHAR ;
+   SendCtrl      : BOOLEAN ;
+
+
+
+VAR
+   WriteBuf: Buffer ;
+
+   SerR    : PtrToProcDes ;
+                       (* Process Descriptor for ReadDriver  *)
+   SerW    : PtrToProcDes ;
+                       (* Process Descriptor for WriteDriver *)
+
+
+(* InitRead is only executed once in the initialization part  *)
+(* of the Module.                                             *)
+
+PROCEDURE InitRead ;
+BEGIN
+   InitProcess( SerR, ReadDriver, 7, 0, StackSpace, 0, System,
+                NIL, 'SerARead' )
+END InitRead ;
+
+
+(* Read is the exported user procedure which waits until a    *)
+(* character is ready in the buffer.                          *)
+
+PROCEDURE Read (VAR ch: CHAR) ;
+BEGIN
+   ReadFromReadBuf( ch )
+END Read ;
+
+
+PROCEDURE InitWrite ;
+BEGIN
+   InitBuffer( WriteBuf ) ;
+   InitProcess( SerW, WriteDriver, 7, 0, StackSpace, 0, System,
+                NIL, 'SerAWrite' )
+END InitWrite ;
+
+
+(* Write is the exported user procedure which waits until a   *)
+(* character is ready in the buffer.                          *)
+
+PROCEDURE Write (ch: CHAR) ;
+BEGIN
+   WriteBuffer( WriteBuf, ch )
+END Write ;
+
+
+PROCEDURE Initialize ;
+VAR
+   Done: BOOLEAN ;
+BEGIN
+   IrqNo := GetIrqNo(IOBase) ;
+   MonStrIO.WriteString('Serial device at ') ; MonStrIO.WriteHex(IOBase, 4) ;
+   MonStrIO.WriteString('  irq no') ; MonStrIO.WriteCard(IrqNo, 4) ;
+   IF IrqNo=256
+   THEN
+      MonStrIO.WriteString(' does not exist\n')
+   ELSE
+      InitBuf ;
+      InitRead ;
+      InitWrite ;
+      SetUpCommPort ;
+      Init( 9600, 1, 8, None, Done ) ;
+      Resume(SerR) ;
+      Resume(SerW) ;
+      IF Done
+      THEN
+         MonStrIO.WriteString(' initialized\n')
+      ELSE
+         MonStrIO.WriteString(' failed\n')
+      END
+   END
+END Initialize ;
+
+
+BEGIN
+   Initialize
+END SerIOA.

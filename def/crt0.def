@@ -1,0 +1,45 @@
+DEFINITION MODULE crt0 ;
+
+(*
+    Title      : crt0
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Wed Aug  9 12:17:01 1995
+    Last edit  : Wed Aug  9 12:17:01 1995
+    Description: provides the startup routines for the realtime system.
+*)
+
+FROM SYSTEM IMPORT ADDRESS ;
+
+EXPORT QUALIFIED RunProgram, red, blue ;
+
+
+(*
+   RunProgram - runs the program held at address, CodeStart, length, Length.
+                It moves the program to, PositionOfStart, and runs it from
+                there. It also blows away any previous program
+                (ie this program).
+*)
+
+PROCEDURE RunProgram (CodeStart       : ADDRESS;
+                      LengthOfTextData: CARDINAL;
+                      LengthOfBss     : CARDINAL;
+                      PositionOfStart : ADDRESS) ;
+
+(*
+   red - a debugging routine to display a red box at the top left
+         of a colour screen (B8000H).
+*)
+
+PROCEDURE red ;
+
+
+(*
+   blue - a debugging routine to display a blue box at the top left
+          of a colour screen (B8000H).
+*)
+
+PROCEDURE blue ;
+
+
+END crt0.

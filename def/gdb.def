@@ -1,0 +1,31 @@
+DEFINITION MODULE gdb ;
+
+(*
+    Title      : gdb
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Sat Aug  5 13:21:35 1995
+    Last edit  : Sat Aug  5 13:21:35 1995
+    Description: provides a Modula-2 interface to the i386-stub.c (remote debugging).
+                 If you want to debug the realtime system then a module should simply
+                 IMPORT gdb ; gdb.Init ;
+*)
+
+EXPORT QUALIFIED Init, breakpoint ;
+
+
+(*
+   Init - initializes the remote debugging mechanism.
+*)
+
+PROCEDURE Init ;
+
+
+(*
+   breakpoint - calls gdb from within your code (simulates a breakpoint).
+*)
+
+PROCEDURE breakpoint ;
+
+
+END gdb.

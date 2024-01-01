@@ -1,0 +1,41 @@
+DEFINITION MODULE minbios ;
+
+(*
+    Title      : minbios
+    Author     : Gaius Mulley
+    Date       : Thu Sep 22 10:38:22 2011
+    Revision   : $Version$ 
+    Description: this module is implemented in 16 bit x86
+                 and as such it is incompatible with the main
+                 LuK 32 bit code.  It provides support routines
+                 for the boot.S bootsector and second.mod secondary
+                 boot stage.  It is minimal as the first boot stage
+                 must not exceed 512 bytes in total.
+*)
+
+
+EXPORT QUALIFIED WriteChar, Red, Blue ;
+
+
+(*
+   WriteChar - writes out, ch, to the screen.
+*)
+
+PROCEDURE WriteChar (ch: CHAR) ;
+
+
+(*
+   Red - places a red box at the top left of the screen.
+*)
+
+PROCEDURE Red ;
+
+
+(*
+   Blue - places a blue box at the top left of the screen.
+*)
+
+PROCEDURE Blue ;
+
+
+END minbios.

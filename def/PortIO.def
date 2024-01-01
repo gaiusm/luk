@@ -1,0 +1,98 @@
+DEFINITION MODULE PortIO ;
+
+(*
+    Title      : PortIO
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Tue Jul 23 15:55:15 1996
+    Last edit  : Tue Jul 23 15:55:15 1996
+    Description: provides a separate module for In and Out instructions.
+*)
+
+FROM SYSTEM IMPORT BYTE, WORD, ADDRESS ;
+
+EXPORT QUALIFIED SlowDownIO, In8, Out8, In16, Out16, InS8, OutS8, InS16, OutS16, InS32, OutS32 ;
+
+
+(*
+   SlowDownIO - linux mechanism for slowing down port accesses.
+*)
+
+PROCEDURE SlowDownIO ;
+
+
+(*
+   In8 - returns a BYTE from port, Port.
+*)
+
+PROCEDURE In8 (Port: CARDINAL) : BYTE ;
+
+
+(*
+   Out8 - sends a byte, Value, to port, Port.
+*)
+
+PROCEDURE Out8 (Port: CARDINAL; Value: BYTE) ;
+
+
+(*
+   In16 - returns a WORD from port, Port.
+          The top 16 bits are 0, the bottom 16 bits are assigned from
+          the value of the port.
+*)
+
+PROCEDURE In16 (Port: CARDINAL) : WORD ;
+
+
+(*
+   Out16 - sends a 16 bit value, Value, to port, Port.
+           Value is actually a 32 bit entity but the top
+           16 bits are ignored.
+*)
+
+PROCEDURE Out16 (Port: CARDINAL; Value: WORD) ;
+
+
+(*
+   InS8 - reads, n, bytes in from port, Port, to address, a.
+*)
+
+PROCEDURE InS8 (Port: CARDINAL; a: ADDRESS; n: CARDINAL) ;
+
+
+(*
+   InS16 - reads, n, 16 bit words in from port, Port, to address, a.
+*)
+
+PROCEDURE InS16 (Port: CARDINAL; a: ADDRESS; n: CARDINAL) ;
+
+
+(*
+   InS32 - reads, n, 32 bit words in from port, Port, to address, a.
+*)
+
+PROCEDURE InS32 (Port: CARDINAL; a: ADDRESS; n: CARDINAL) ;
+
+
+(*
+   OutS8 - writes, n, bytes to port, Port, from address, a.
+*)
+
+PROCEDURE OutS8 (Port: CARDINAL; a: ADDRESS; n: CARDINAL) ;
+
+
+(*
+   OutS16 - writes, n, 16 bit words to port, Port, from address, a.
+*)
+
+PROCEDURE OutS16 (Port: CARDINAL; a: ADDRESS; n: CARDINAL) ;
+
+
+(*
+   OutS32 - writes, n, 32 bit words to port, Port, from address, a.
+*)
+
+PROCEDURE OutS32 (Port: CARDINAL; a: ADDRESS; n: CARDINAL) ;
+
+
+END PortIO.

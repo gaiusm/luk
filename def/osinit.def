@@ -1,0 +1,115 @@
+DEFINITION MODULE osinit ;
+
+(*
+    Title      : osinit
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Wed Aug  3 13:27:10 1994
+    Last edit  : Wed Aug  3 13:27:10 1994
+    Description: provides an interface which contains all
+                 the initialization constants for the realtime system.
+*)
+
+FROM SYSTEM IMPORT ADDRESS ;
+
+EXPORT QUALIFIED ScreenAddress,
+                 ExtendedMemoryEnd,
+                 ExtendedMemoryStart,
+                 BaseMemoryStart,
+                 BaseMemoryEnd,
+                 SizeOfOS,
+                 DebuggingWithGDB,
+                 MainStackSize,
+                 Init, ResetParameters,
+                 SetDebugging, GetDebugging ;
+
+
+(*
+   ScreenAddress - returns the start address of the video memory.
+*)
+
+PROCEDURE ScreenAddress () : ADDRESS ;
+
+
+(*
+   ExtendedMemoryEnd - returns the maximum extended memory address.
+*)
+
+PROCEDURE ExtendedMemoryEnd () : ADDRESS ;
+
+
+(*
+   ExtendedMemoryStart - returns the start of the extended memory.
+*)
+
+PROCEDURE ExtendedMemoryStart () : ADDRESS ;
+
+
+(*
+   BaseMemoryEnd - returns the maximum base memory address.
+*)
+
+PROCEDURE BaseMemoryEnd () : ADDRESS ;
+
+
+(*
+   BaseMemoryStart - returns the start of the base memory.
+*)
+
+PROCEDURE BaseMemoryStart () : ADDRESS ;
+
+
+(*
+   SizeOfOS - returns the size of the realtime system.
+*)
+
+PROCEDURE SizeOfOS () : CARDINAL ;
+
+
+(*
+   DebuggingWithGDB - returns TRUE if we are remote debugging with gdb.
+*)
+
+PROCEDURE DebuggingWithGDB () : BOOLEAN ;
+
+
+(*
+   SetDebugging - sets the debugging variable.
+*)
+
+PROCEDURE SetDebugging (d: CARDINAL) ;
+
+
+(*
+   GetDebugging - returns the debugging variable.
+                  0  means not debugging with GDB
+                  1  means debugging via com1
+                  2  means debugging via com2
+*)
+
+PROCEDURE GetDebugging () : CARDINAL ;
+
+
+(*
+   MainStackSize - returns the size of mains stack.
+*)
+
+PROCEDURE MainStackSize () : CARDINAL ;
+
+
+(*
+   Init - retrieve all parameters from second bootstage.
+*)
+
+PROCEDURE Init ;
+
+
+(*
+   ResetParameters - replaces the parameters back to the original position
+                     ready for a reboot.
+*)
+
+PROCEDURE ResetParameters ;
+
+
+END osinit.

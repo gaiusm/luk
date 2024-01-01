@@ -1,0 +1,11 @@
+@section boundedbuffer
+
+In this exercise you must complete the bounded buffer module as discussed
+in the lecture.
+
+There is an initial attempt of BufferDevice.c in this directory and
+this can be built using the generic building instructions found in
+this document.  Your task is to finish the two functions
+@code{BufferDevice_InitBuffer} and @code{BufferDevice_ReadBuffer}.
+Both functions have been discussed in the lectures and their
+associated notes.

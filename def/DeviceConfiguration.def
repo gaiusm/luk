@@ -1,0 +1,28 @@
+DEFINITION MODULE DeviceConfiguration ;
+
+(*
+   Title      : DeviceConfiguration
+   Author     : Gaius Mulley
+   Date       : 28/2/88
+   LastEdit   : 7/9/94
+   System     : RTS gm2
+   Description: Provides a global module for device characteristics
+                and device names.
+*)
+
+EXPORT QUALIFIED Parity, GetIrqNo ;
+
+TYPE
+   Parity = (None, Odd, Even) ;
+
+
+(*
+   GetIrqNo - returns the irq number for a UART.
+              This function returns 256 if UART has no IRQ
+              else IRQ level (2-7)
+*)
+
+PROCEDURE GetIrqNo (BaseAddress: CARDINAL) : CARDINAL ;
+
+
+END DeviceConfiguration.

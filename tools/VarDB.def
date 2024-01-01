@@ -1,0 +1,46 @@
+DEFINITION MODULE VarDB ;
+
+(*
+    Title      : VarDB
+    Author     : Gaius Mulley
+    System     : UNIX (gm2)
+    Date       : Wed May 19 22:08:28 1993
+    Last edit  : Wed May 19 22:08:28 1993
+    Description: Variable data base. It contains variable names
+                 and associated values.
+*)
+
+FROM NameKey IMPORT Name ;
+
+EXPORT QUALIFIED InitVarDB, PutValue, GetValue, IsValue ;
+
+
+(*
+   InitVarDB - wipes out the complete variable database.
+*)
+
+PROCEDURE InitVarDB ;
+
+
+(*
+   PutValue - places, Value, into variable, n.
+*)
+
+PROCEDURE PutValue (n: Name; Value: CARDINAL) ;
+
+
+(*
+   GetValue - returns the value to a variable, n.
+*)
+
+PROCEDURE GetValue (n: Name) : CARDINAL ;
+
+
+(*
+   IsValue - returns TRUE if variable, n, has been defined.
+*)
+
+PROCEDURE IsValue (n: Name) : BOOLEAN ;
+
+
+END VarDB.
